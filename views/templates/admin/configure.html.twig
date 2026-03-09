@@ -1,0 +1,158 @@
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-header-title">{{ 'Authorize by credentials'|trans({}, 'ModulesAlliancePayAdmin') }}</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ auth_url }}">
+                <button class="btn btn-primary mt-3" type="submit">{{ 'Authorize'|trans({}, 'ModulesAlliancePayAdmin') }}</button>
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-header-title">{{ 'AlliancePay Settings'|trans({}, 'ModulesAlliancePayAdmin') }}</h3>
+        </div>
+
+        <div class="card-body">
+            <form method="post" action="{{ save_url }}">
+                <div class="form-group">
+                    <label>{{ 'Is Enabled'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <select name="ALLIANCE_PAY_ENABLED" class="form-control">
+                        <option value="1"  {{ config.ALLIANCE_PAY_ENABLED == '1' ? 'selected' }}>{{ 'Yes'|trans({}, 'ModulesAlliancePayAdmin') }}</option>
+                        <option value="0"  {{ config.ALLIANCE_PAY_ENABLED == '0' ? 'selected' }}>{{ 'No'|trans({}, 'ModulesAlliancePayAdmin') }}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Title'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <input type="text" class="form-control" name="ALLIANCE_PAY_NAME" value="{{ config.ALLIANCE_PAY_NAME }}">
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Status page type'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <select name="ALLIANCE_PAY_STATUS_PAGE_TYPE" class="form-control">
+                        {% for key, status in status_page_types %}
+                            {% if config.ALLIANCE_PAY_STATUS_PAGE_TYPE == status %}
+                                <option value="{{ config.ALLIANCE_PAY_STATUS_PAGE_TYPE }}" selected>
+                                    {{ config.ALLIANCE_PAY_STATUS_PAGE_TYPE }}
+                                </option>
+                            {% else %}
+                                <option value="{{ status }}">
+                                    {{ status }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'API Url'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <input type="text"
+                           class="form-control"
+                           name="ALLIANCE_PAY_API_URL" value="{{ config.ALLIANCE_PAY_API_URL }}">
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Service code'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <input type="text"
+                           class="form-control"
+                           name="ALLIANCE_PAY_SERVICE_CODE" value="{{ config.ALLIANCE_PAY_SERVICE_CODE }}">
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Merchant Id'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <input type="text"
+                           class="form-control"
+                           name="ALLIANCE_PAY_MERCHANT_ID" value="{{ config.ALLIANCE_PAY_MERCHANT_ID }}">
+                </div>
+                <div class="form-group">
+                    <label for="ALLIANCE_PAY_AUTHORIZATION_KEY">{{ 'Authorization Key'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <textarea class="form-control"
+                              name="ALLIANCE_PAY_AUTHORIZATION_KEY">{{ config.ALLIANCE_PAY_AUTHORIZATION_KEY }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Device Id'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <input type="text"
+                           class="form-control"
+                           name="ALLIANCE_PAY_DEVICE_ID" value="{{ config.ALLIANCE_PAY_DEVICE_ID }}" disabled>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Refresh token'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <input type="text"
+                           class="form-control"
+                           name="ALLIANCE_PAY_REFRESH_TOKEN" value="{{ config.ALLIANCE_PAY_REFRESH_TOKEN }}" disabled>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Auth token'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <input type="text"
+                           class="form-control"
+                           name="ALLIANCE_PAY_AUTH_TOKEN" value="{{ config.ALLIANCE_PAY_AUTH_TOKEN }}" disabled>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Success order state'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <select name="ALLIANCE_PAY_SUCCESS_ORDER" class="form-control">
+                        {% for id, state_name in order_states %}
+                            {% if config.ALLIANCE_PAY_SUCCESS_ORDER == id %}
+                                <option value="{{ config.ALLIANCE_PAY_SUCCESS_ORDER }}" selected>
+                                    {{ state_name }}
+                                </option>
+                            {% else %}
+                                <option value="{{ id }}">
+                                    {{ state_name }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Fail order state'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <select name="ALLIANCE_PAY_FAIL_ORDER" class="form-control">
+                        {% for id, state_name in order_states %}
+                            {% if config.ALLIANCE_PAY_FAIL_ORDER == id %}
+                                <option value="{{ config.ALLIANCE_PAY_FAIL_ORDER }}" selected>
+                                    {{ state_name }}
+                                </option>
+                            {% else %}
+                                <option value="{{ id }}">
+                                    {{ state_name }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Refund success order state'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <select name="ALLIANCE_PAY_SUCCESS_REFUND_ORDER_STATE" class="form-control">
+                        {% for id, state_name in order_states %}
+                            {% if config.ALLIANCE_PAY_SUCCESS_REFUND_ORDER_STATE == id %}
+                                <option value="{{ config.ALLIANCE_PAY_SUCCESS_REFUND_ORDER_STATE }}" selected>
+                                    {{ state_name }}
+                                </option>
+                            {% else %}
+                                <option value="{{ id }}">
+                                    {{ state_name }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Refund fail order state'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <select name="ALLIANCE_PAY_FAIL_REFUND_ORDER_STATE" class="form-control">
+                        {% for id, state_name in order_states %}
+                            {% if config.ALLIANCE_PAY_FAIL_REFUND_ORDER_STATE == id %}
+                                <option value="{{ config.ALLIANCE_PAY_FAIL_REFUND_ORDER_STATE }}" selected>
+                                    {{ state_name }}
+                                </option>
+                            {% else %}
+                                <option value="{{ id }}">
+                                    {{ state_name }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button class="btn btn-primary mt-3" type="submit">{{ 'Save'|trans({}, 'ModulesAlliancePayAdmin') }}</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

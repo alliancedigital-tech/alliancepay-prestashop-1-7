@@ -1,0 +1,216 @@
+imports:
+  - { resource: ./common.yml }
+
+services:
+  _defaults:
+    public: true
+    autowire: true
+    autoconfigure: true
+
+  alliance.logger:
+    class: AlliancePay\Logger\AllianceLogger
+    public: true
+    arguments:
+      $handler: '@alliance.logger.handler'
+
+  alliance.logger.handler:
+    class: AlliancePay\Logger\AllianceLoggerHandler
+    public: true
+
+  alliance.config:
+    class: AlliancePay\Config\Config
+    public: true
+    autowire: true
+    arguments:
+      - '@prestashop.adapter.legacy.configuration'
+      - '@prestashop.adapter.legacy.context'
+      - '@prestashop.adapter.data_provider.order_state'
+      - '@prestashop.adapter.data_provider.language'
+      - "@alliance.logger"
+
+  alliance.data.converter:
+    class: AlliancePay\Service\ConvertData\ConvertDataService
+
+  alliance.country.code:
+    class: League\ISO3166\ISO3166
+    public: true
+    autowire: true
+
+  alliance.country.code.provider:
+    class: AlliancePay\Service\Country\CountryCodeProvider
+    public: true
+    autowire: true
+    arguments:
+      $countryCode: '@alliance.country.code'
+
+  alliance.entity.hydrator:
+    class: AlliancePay\Entity\Hydrator\EntityHydrator
+    public: true
+    arguments:
+      $dateTimeProvider: '@alliance.datetime.immutable.provider'
+
+  AlliancePay\Controller\Admin\Settings\AlliancePaySettingsController:
+    class: AlliancePay\Controller\Admin\Settings\AlliancePaySettingsController
+    public: true
+    arguments:
+      - '@twig'
+      - '@router'
+      - '@alliance.config'
+
+  AlliancePay\Controller\Admin\Settings\AlliancePaySaveSettingsController:
+    class: AlliancePay\Controller\Admin\Settings\AlliancePaySaveSettingsController
+    public: true
+    autowire: true
+    arguments:
+      - '@twig'
+      - '@router'
+      - '@alliance.config'
+      - '@translator'
+
+  AlliancePay\Controller\Admin\Authorization\AlliancePayAuthorizeByVirtualDeviceController:
+    class: AlliancePay\Controller\Admin\Authorization\AlliancePayAuthorizeByVirtualDeviceController
+    public: true
+    arguments:
+      $authService: '@alliance.auth.service'
+      $logger: '@alliance.logger'
+      $translator: '@translator'
+
+  AlliancePay\Controller\Admin\Order\TransactionInfoController:
+    class: AlliancePay\Controller\Admin\Order\TransactionInfoController
+    public: true
+    arguments:
+      $client: '@AlliancePay\Service\Gateway\HttpClient'
+      $updateAllianceOrder: '@alliance.order.update'
+      $entityManager: '@doctrine.orm.entity_manager'
+
+  AlliancePay\Service\Gateway\Factory\HttpClientFactory:
+    class: AlliancePay\Service\Gateway\Factory\HttpClientFactory
+
+  AlliancePay\Service\Gateway\HttpClient:
+    class: AlliancePay\Service\Gateway\HttpClient
+    public: true
+    autowire: true
+    arguments:
+      $httpFactory: '@AlliancePay\Service\Gateway\Factory\HttpClientFactory'
+      $config: '@alliance.config'
+      $jweEncryptionService: '@alliance.encryption.service'
+      $allianceLogger: '@alliance.logger'
+
+  alliance.encryption.service.jwefactory:
+    class: AlliancePay\Service\Encryption\Factory\JWEFactory
+    public: true
+
+  alliance.encryption.service.keysetfactory:
+    class: AlliancePay\Service\Encryption\Factory\KeySetFactory
+    public: true
+    autowire: true
+
+  alliance.encryption.service.keyfactory:
+    class: SimpleJWT\Keys\KeyFactory
+    public: true
+    autowire: true
+
+  alliance.encryption.service:
+    class: AlliancePay\Service\Encryption\JweEncryptionService
+    public: true
+    autowire: true
+    arguments:
+      $keyFactory: '@alliance.encryption.service.keyfactory'
+      $keySetFactory: '@alliance.encryption.service.keysetfactory'
+      $jweFactory: '@alliance.encryption.service.jwefactory'
+      $logger: '@alliance.logger'
+
+  alliance.auth.service:
+    class: AlliancePay\Service\Authorization\AuthorizationService
+    public: true
+    autowire: true
+    arguments:
+      $client: '@AlliancePay\Service\Gateway\HttpClient'
+      $config: '@alliance.config'
+      $jweEncryptionService: '@alliance.encryption.service'
+      $logger: '@alliance.logger'
+
+  alliance.payment.processor:
+    class: AlliancePay\Model\Payment\PaymentProcessor
+    public: true
+    autowire: true
+    arguments:
+      $countryCodeProvider: '@alliance.country.code.provider'
+      $httpClient: '@AlliancePay\Service\Gateway\HttpClient'
+      $entityHydrator: '@alliance.entity.hydrator'
+      $allianceOrderFactory: '@alliance.order.factory'
+      $convertDataService: '@alliance.data.converter'
+      $config: '@alliance.config'
+      $urlProvider: '@alliance.url.provider'
+      $allianceLogger: '@alliance.logger'
+
+  alliance.payment.processor.wrapper:
+    class: AlliancePay\Model\Payment\PaymentProcessorWrapper
+    public: true
+
+  alliance.callback.processor:
+    class: AlliancePay\Service\Callback\CallbackProcessor
+    public: true
+    autowire: true
+    arguments:
+      $updateAllianceOrder: '@alliance.order.update'
+      $updateOrderStatus: '@alliance.order.update.staus'
+      $config: '@alliance.config'
+      $allianceLogger: '@alliance.logger'
+
+  alliance.refund.processor:
+    class: AlliancePay\Model\Payment\Refund\RefundProcessor
+    public: true
+    arguments:
+      $allianceRefundFactory: '@alliance.refund.factory'
+      $httpClient: '@AlliancePay\Service\Gateway\HttpClient'
+      $config: '@alliance.config'
+      $convertDataService: '@alliance.data.converter'
+      $entityHydrator: '@alliance.entity.hydrator'
+      $dateTimeNormalizer: '@alliance.datetime.normalizer'
+      $urlProvider: '@alliance.url.provider'
+      $updateOrderStatus: '@alliance.order.update.staus'
+      $allianceLogger: '@alliance.logger'
+
+  alliance.url.provider:
+    class: AlliancePay\Service\Url\UrlProvider
+    public: true
+
+  alliance.datetime.immutable.provider:
+    class: AlliancePay\Model\DateTime\DateTimeImmutableProvider
+    public: true
+
+  alliance.datetime.normalizer:
+    class: AlliancePay\Model\DateTime\DateTimeNormalizer
+    public: true
+    arguments:
+      $config: '@prestashop.adapter.legacy.configuration'
+
+  alliance.order.factory:
+    class: AlliancePay\Entity\Factory\AllianceOrderFactory
+    public: true
+    arguments:
+      $dateTimeProvider: '@alliance.datetime.immutable.provider'
+
+  alliance.refund.factory:
+    class: AlliancePay\Entity\Factory\AllianceRefundFactory
+    public: true
+    arguments:
+      $dateTimeProvider: '@alliance.datetime.immutable.provider'
+
+  alliance.order.update.staus:
+    class: AlliancePay\Service\Order\UpdateOrderStatus
+    public: true
+
+  alliance.order.update:
+    class: AlliancePay\Model\AllianceOrder\UpdateAllianceOrder
+    public: true
+    arguments:
+      $convertDataService: '@alliance.data.converter'
+      $entityHydrator: '@alliance.entity.hydrator'
+      $dateTimeImmutableProvider: '@alliance.datetime.immutable.provider'
+      $allianceLogger: '@alliance.logger'
+
+  alliance.order.info:
+    class: AlliancePay\Model\Payment\Order\OrderInformation
+    public: true

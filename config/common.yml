@@ -1,0 +1,21 @@
+services:
+  _defaults:
+    public: true
+    autowire: true
+    autoconfigure: true
+
+  AlliancePay\Repository\AllianceOrderRepository:
+    class: AlliancePay\Repository\AllianceOrderRepository
+    public: true
+    autowire: false
+    factory: [ '@doctrine.orm.default_entity_manager', getRepository ]
+    arguments:
+      - 'AlliancePay\Entity\AllianceOrder'
+
+  AlliancePay\Repository\RefundRepository:
+    class: AlliancePay\Repository\RefundRepository
+    public: true
+    autowire: false
+    factory: [ '@doctrine.orm.default_entity_manager', getRepository ]
+    arguments:
+      - 'AlliancePay\Entity\AllianceRefundOrder'

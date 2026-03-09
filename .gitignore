@@ -1,0 +1,36 @@
+# Cache and temporary files
+/cache/
+/var/cache/
+/var/logs/
+/var/tmp/
+/var/sessions/
+
+# Configuration files (if they contain sensitive data or are environment-specific)
+/config/settings.inc.php
+/config/parameters.php
+
+# Generated files
+/themes/*/cache/
+/themes/*/compiled/
+/themes/*/lang/
+/themes/*/pdf/
+/img/tmp/
+/upload/
+
+# Node.js modules (if you use them for frontend development)
+/node_modules/
+
+# IDE-specific files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Other common exclusions
+/modules/*/config.xml # If this is generated or contains environment-specific data
+/modules/*/install.sql # If this is for local installation and not part of the core module

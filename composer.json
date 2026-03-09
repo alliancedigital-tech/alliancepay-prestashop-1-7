@@ -1,0 +1,26 @@
+{
+    "name": "alliancepay/alliancepay-prestashop-1-7",
+    "description": "Alliance Bank payment method through the Hosted Payment Page.",
+    "type": "prestashop-module",
+    "license": "GPL-3.0-or-later",
+    "require": {
+        "php": ">=7.3",
+        "kelvinmo/simplejwt": "0.9.3",
+        "league/iso3166": "4.3.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "AlliancePay\\": "src/"
+        }
+    },
+    "config": {
+        "platform": {
+            "php": "7.3.33"
+        },
+        "prepend-autoloader": false,
+        "allow-plugins": {
+            "composer/installers": true
+        },
+        "sort-packages": true
+    }
+}

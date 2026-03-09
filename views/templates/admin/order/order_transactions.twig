@@ -1,0 +1,100 @@
+<div class="card">
+    <h3 class="card-header">
+        <i class="material-icons">sync</i>
+        Alliance Transaction Info
+    </h3>
+
+    <div class="card-body">
+        <table class="table" id="extra-table">
+            <thead>
+            <tr>
+                <th>Operation type</th>
+                <th>Operation ID</th>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for operation in operations %}
+                <tr>
+                    <td>{{ operation.type }}</td>
+                    <td>{{ operation.operationId }}</td>
+                    <td>{{ operation.creationDateTime }}</td>
+                    <td>
+                        <span class="badge badge-info">{{ operation.status }}</span>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3" class="text-muted text-center">
+                        No data loaded
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <button class="btn btn-primary" id="sync-btn">
+            Update from Alliance API
+        </button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    document.getElementById('sync-btn').addEventListener('click', async () => {
+        const tableBody = document.querySelector('#extra-table tbody');
+        tableBody.innerHTML = `
+        <tr>
+            <td colspan="3" class="text-center">
+                Loading...
+            </td>
+        </tr>
+    `;
+
+        try {
+            const response = await fetch('{{ sync_url }}');
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.message || 'API error');
+            }
+
+            tableBody.innerHTML = '';
+
+            if (result.items.length === 0) {
+                tableBody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="text-center text-muted">
+                        Empty response
+                    </td>
+                </tr>
+            `;
+                return;
+            }
+
+            result.items.forEach(item => {
+                tableBody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td>${item.type}</td>
+                    <td>${item.operationId}</td>
+                    <td>${item.creationDateTime}</td>
+                    <td>
+                        <span class="badge badge-info">
+                            ${item.status}
+                        </span>
+                    </td>
+                </tr>
+            `);
+            });
+
+        } catch (e) {
+            tableBody.innerHTML = `
+            <tr>
+                <td colspan="3" class="text-danger text-center">
+                    ${e.message}
+                </td>
+            </tr>
+        `;
+        }
+    });
+</script>

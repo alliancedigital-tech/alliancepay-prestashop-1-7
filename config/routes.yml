@@ -1,0 +1,29 @@
+alliance.admin.configure:
+  path: /admin/alliancepay/configure
+  methods: [ GET, POST ]
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Settings\AlliancePaySettingsController::indexAction'
+    _legacy_controller: 'AlliancePaySettingsController'
+    _legacy_link: 'AlliancePaySettingsController'
+
+alliance.save.config:
+  path: /alliancepay/admin/save/config
+  methods: [ POST ]
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Settings\AlliancePaySaveSettingsController::saveAction'
+    _legacy_controller: 'AlliancePaySaveSettingsController'
+    _legacy_link: 'AlliancePaySaveSettingsController'
+
+alliance.authorize.by.virtual.device:
+  path: /alliancepay/admin/authorize
+  methods: [ POST ]
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Authorization\AlliancePayAuthorizeByVirtualDeviceController::authorizeAction'
+    _legacy_controller: 'AlliancePayAuthorizeByVirtualDeviceController'
+    _legacy_link: 'AlliancePayAuthorizeByVirtualDeviceController'
+
+alliance.order.sync:
+  path: /alliancepay/admin/order/{orderId}/sync
+  methods: [ GET ]
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Order\TransactionInfoController::syncAction'

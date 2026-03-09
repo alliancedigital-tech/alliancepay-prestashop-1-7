@@ -1,0 +1,40 @@
+name: Create PrestaShop Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: Prepare PrestaShop Structure
+        run: |
+          mkdir -p dist/alliancepay
+          cp -R . dist/alliancepay/ || true
+          cd dist/alliancepay
+          rm -rf dist .git .github .gitignore composer.json composer.lock 2>/dev/null || true
+          cd ../..
+
+      - name: Create ZIP Archive
+        run: |
+          cd dist
+          zip -r ../alliancepay-prestashop-${{ github.ref_name }}.zip .
+          cd ..
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: alliancepay-prestashop-${{ github.ref_name }}.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

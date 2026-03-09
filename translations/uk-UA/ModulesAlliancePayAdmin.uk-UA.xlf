@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="not-relevant" source-language="en" target-language="uk" datatype="plaintext">
+    <body>
+      <trans-unit id="1">
+        <source>Failed to authorize.</source>
+        <target>Помилка авторизації.</target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Failed to authorize.</source>
+        <target>Помилка авторизації.</target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Authorization failed. Please try again.</source>
+        <target>Помилка авторизації. Спробуйте ще раз.</target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Settings saved.</source>
+        <target>Налаштування збережено.</target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Save</source>
+        <target>Зберегти</target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Status page type</source>
+        <target>Тип сторінки статусу</target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>API Url</source>
+        <target>API URL</target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Service code</source>
+        <target>Сервісний код (Service Code)</target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Merchant Id</source>
+        <target>ID Мерчанта (Merchant Id)</target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Authorization Key</source>
+        <target>Ключ авторизації</target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Device Id</source>
+        <target>ID пристрою (Device Id)</target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Refresh token</source>
+        <target>Токен оновлення (Refresh token)</target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Auth token</source>
+        <target>Токен авторизації (Auth token)</target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Success order state</source>
+        <target>Статус успішного замовлення</target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Fail order state</source>
+        <target>Статус невдалого замовлення</target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Refund success order state</source>
+        <target>Статус успішного повернення</target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Refund fail order state</source>
+        <target>Статус помилки повернення</target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Authorize</source>
+        <target>Авторизуватись</target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>AlliancePay Settings</source>
+        <target>Налаштування модуля AlliancePay</target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Authorize by credentials</source>
+        <target>Налаштування модуля AlliancePay</target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Title</source>
+        <target>Назва платіжного метода на сторінці оплати</target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Is Enabled</source>
+        <target>Включити модуль</target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Yes</source>
+        <target>Так</target>
+      </trans-unit>
+       <trans-unit id="24">
+        <source>No</source>
+        <target>Ні</target>
+      </trans-unit>
+      </body>
+  </file>
+</xliff>
