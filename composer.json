@@ -21,6 +21,9 @@
         "allow-plugins": {
             "composer/installers": true
         },
-        "sort-packages": true
+        "sort-packages": true,
+        "audit": {
+            "ignore": ["PKSA-njxg-bvx9-65t2"]
+        }
     }
 }

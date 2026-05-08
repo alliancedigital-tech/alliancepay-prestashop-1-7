@@ -143,6 +143,7 @@ services:
       $config: '@alliance.config'
       $urlProvider: '@alliance.url.provider'
       $allianceLogger: '@alliance.logger'
+      $validateCustomerData: '@alliance.validate.customer.data'
 
   alliance.payment.processor.wrapper:
     class: AlliancePay\Model\Payment\PaymentProcessorWrapper
@@ -214,3 +215,10 @@ services:
   alliance.order.info:
     class: AlliancePay\Model\Payment\Order\OrderInformation
     public: true
+
+  alliance.validate.customer.data:
+    class: AlliancePay\Model\Validator\CustomerDataValidator
+    public: true
+    arguments:
+        $dateTimeNormalizer: '@alliance.datetime.normalizer'
+        $logger: '@alliance.logger'

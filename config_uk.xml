@@ -2,7 +2,7 @@
 <module>
     <name>alliancepay</name>
     <displayName><![CDATA[AlliancePay]]></displayName>
-    <version><![CDATA[1.0.0]]></version>
+    <version><![CDATA[1.0.1]]></version>
     <description><![CDATA[AlliancePay платіжний модуль для Prestashop від Alliance Bank]]></description>
     <author><![CDATA[Alliance Dgtl.]]></author>
     <tab><![CDATA[payments_gateways]]></tab>

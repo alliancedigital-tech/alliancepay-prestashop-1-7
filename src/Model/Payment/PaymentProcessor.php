@@ -11,6 +11,7 @@ use AlliancePay\Entity\Factory\AllianceOrderFactory;
 use AlliancePay\Entity\Hydrator\EntityHydrator;
 use AlliancePay\Logger\AllianceLogger;
 use AlliancePay\Config\Config;
+use AlliancePay\Model\Validator\CustomerDataValidator;
 use AlliancePay\Service\ConvertData\ConvertDataService;
 use AlliancePay\Service\Country\CountryCodeProvider;
 use AlliancePay\Service\Gateway\HttpClient;
@@ -58,6 +59,11 @@ class PaymentProcessor extends AbstractProcessor
      */
     private $urlProvider;
 
+    /**
+     * @var CustomerDataValidator
+     */
+    private $validateCustomerData;
+
     public function __construct(
         CountryCodeProvider $countryCodeProvider,
         HttpClient $httpClient,
@@ -66,7 +72,8 @@ class PaymentProcessor extends AbstractProcessor
         ConvertDataService $convertDataService,
         Config $config,
         UrlProvider $urlProvider,
-        AllianceLogger $allianceLogger
+        AllianceLogger $allianceLogger,
+        CustomerDataValidator $validateCustomerData
     ) {
         $this->countryCodeProvider = $countryCodeProvider;
         $this->httpClient = $httpClient;
@@ -76,6 +83,7 @@ class PaymentProcessor extends AbstractProcessor
         $this->config = $config;
         $this->urlProvider = $urlProvider;
         $this->logger = $allianceLogger;
+        $this->validateCustomerData = $validateCustomerData;
     }
 
     public function processPayment($context, $cart, $em)
@@ -153,13 +161,20 @@ class PaymentProcessor extends AbstractProcessor
 
         if (!$customer->isGuest()) {
             if ($customer->birthday !== '0000-00-00') {
-                $data['senderBirthday'] = $this->normalizeDob($customer->birthday) ?? '';
+                $data['senderBirthday'] = $customer->birthday ?? '';
             }
             $data['senderCustomerId'] = $customer->id;
         } else {
             $data['senderCustomerId'] = (string) $customer->id ?? $customer->email;
         }
         $customerAddress = $customer->getSimpleAddress($order->id_address_delivery);
+        if ($customer->id_gender == '1') {
+            $customerGender = 'Male';
+        } else if ($customer->id_gender == '2') {
+            $customerGender = 'Female';
+        } else {
+            $customerGender = 'Other';
+        }
 
         $countryCode = $this->countryCodeProvider->getCountryNumericCodeByAlpha2($context->country->iso_code);
         $data['senderEmail'] = $customer->email ?? '';
@@ -169,34 +184,15 @@ class PaymentProcessor extends AbstractProcessor
         $data['senderStreet'] = $customerAddress['address1'] ?? '';
         $data['senderCity'] = $customerAddress['city'] ?? '';
         $data['senderZipCode'] = $customerAddress['postcode'] ?? '';
-        $data['senderPhone'] = $customerAddress['phone'] ?? '';
+        $data['senderPhone'] = $customerAddress['phone'] ?? $customerAddress['phone_mobile'] ?? '';
+        $data['senderAdditionalAddress'] = $customerAddress['address2'] ?? '';
+        $data['senderIp'] = Tools::getRemoteAddr();
+        $data['senderGender'] = $customerGender;
 
         if (!empty($countryCode)) {
             $data['senderCountry'] = $countryCode;
         }
 
-        return $this->validateAndClenUpData($data);
-    }
-
-    /**
-     * @param array $data
-     * @return array
-     */
-    private function validateAndClenUpData(array $data): array
-    {
-        $validatedData = [];
-
-        foreach ($data as $key => $value) {
-            if (!empty($value)) {
-                $validatedData[$key] = $value;
-            }
-        }
-
-        return $validatedData;
-    }
-
-    public function normalizeDob($dob)
-    {
-        return date('d.m.Y', strtotime($dob));
+        return $this->validateCustomerData->validate($data);
     }
 }
