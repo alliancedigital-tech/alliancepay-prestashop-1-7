@@ -49,6 +49,6 @@ class AlliancePayCallbackModuleFrontController extends ModuleFrontController
             //do nothing.
         }
 
-        return $this->callbackProcessor instanceof CallBackProcessor;
+        return $this->callbackProcessor instanceof CallbackProcessor;
     }
 }

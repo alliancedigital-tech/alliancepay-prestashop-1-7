@@ -20,6 +20,10 @@ class OrderInformation
         $repository = $entityManager->getRepository(AllianceOrder::class);
         $order = $repository->findByOrderId((string) $orderId);
 
+        if (empty($order)) {
+            return [];
+        }
+
         return $this->getOperationsFromCallbackData($order);
     }
 

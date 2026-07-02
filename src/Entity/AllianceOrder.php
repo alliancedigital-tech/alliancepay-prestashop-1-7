@@ -152,6 +152,13 @@ class AllianceOrder
      */
     private $expiredOrderDate;
 
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="transaction_type", type="integer", nullable=true)
+     */
+    private $transactionType;
+
     public function __construct(
         DateTimeImmutableProvider $dateTimeImmutableProvider
     ) {
@@ -433,6 +440,23 @@ class AllianceOrder
     }
 
     /**
+     * @return int|null
+     */
+    public function getTransactionType(): ?int
+    {
+        return $this->transactionType;
+    }
+
+    /**
+     * @param int|null $transactionType
+     * @return void
+     */
+    public function setTransactionType(?int $transactionType): void
+    {
+        $this->transactionType = $transactionType;
+    }
+
+    /**
      * @return array
      */
     public function toArray(): array
@@ -453,7 +477,8 @@ class AllianceOrder
             'ecomOrderId' => $this->getEcomOrderId(),
             'isCallbackReturned' => $this->isCallbackReturned(),
             'callbackData' => $this->getCallbackData(),
-            'expiredOrderDate' => $this->getExpiredOrderDate()
+            'expiredOrderDate' => $this->getExpiredOrderDate(),
+            'transactionType' => $this->getTransactionType(),
         ];
     }
 }

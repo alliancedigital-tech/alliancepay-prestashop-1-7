@@ -24,10 +24,16 @@ class Config
     public const MODULE_TAB_NAME = 'payments_gateways';
     public const PAYMENT_NAME = 'AlliancePay';
     public const PAYMENT_METHODS = ['CARD', 'APPLE_PAY', 'GOOGLE_PAY'];
-    public const HPP_PAY_TYPE = 'PURCHASE';
+    public const HPP_PAY_TYPE_PURCHASE = 'PURCHASE';
+    public const HPP_PAY_TYPE_A2A = 'A2A';
+    public const OPERATION_TYPE_A2A = 'ACCOUNT_2_ACCOUNT';
+    public const OPERATION_TYPE_PURCHASE = 'PURCHASE';
+    public const DIRECT_TYPE_BANK_LINK = 'BANK_LINK';
+    public const PRIORITY_BANK_CODE = 'ALL_BANKS';
     public const PAYMENT_ENABLED_CONFIG_NAME = 'ALLIANCE_PAY_ENABLED';
     public const PAYMENT_NAME_CONFIG_NAME = 'ALLIANCE_PAY_NAME';
     public const PAYMENT_STATUS_PAGE_TYPE_CONFIG_NAME = 'ALLIANCE_PAY_STATUS_PAGE_TYPE';
+    public const PAYMENT_HPP_PAY_TYPE = 'ALLIANCE_HPP_PAY_TYPE';
     public const PAYMENT_API_URL_CONFIG_NAME = 'ALLIANCE_PAY_API_URL';
     public const PAYMENT_SERVICE_CODE_CONFIG_NAME = 'ALLIANCE_PAY_SERVICE_CODE';
     public const PAYMENT_MERCHANT_ID_CONFIG_NAME = 'ALLIANCE_PAY_MERCHANT_ID';
@@ -48,6 +54,7 @@ class Config
         self::PAYMENT_ENABLED_CONFIG_NAME,
         self::PAYMENT_NAME_CONFIG_NAME,
         self::PAYMENT_STATUS_PAGE_TYPE_CONFIG_NAME,
+        self::PAYMENT_HPP_PAY_TYPE,
         self::PAYMENT_API_URL_CONFIG_NAME,
         self::PAYMENT_SERVICE_CODE_CONFIG_NAME,
         self::PAYMENT_MERCHANT_ID_CONFIG_NAME,
@@ -88,12 +95,19 @@ class Config
         'STATUS_PAGE'
     ];
 
+    public const HPP_PAY_TYPES = [
+        self::HPP_PAY_TYPE_PURCHASE,
+        self::HPP_PAY_TYPE_A2A,
+    ];
+
     public const SUCCESS_ORDER_STATUS = 'SUCCESS';
     public const FAIL_ORDER_STATUS = 'FAIL';
 
     public const REFUND_STATUS_SUCCESS = 'SUCCESS';
     public const REFUND_STATUS_PENDING = 'PENDING';
     public const REFUND_STATUS_FAIL = 'FAIL';
+
+    public const TRANSACTION_TYPE_A2A = 102;
 
     private $config;
 
@@ -164,6 +178,8 @@ class Config
                 $this->config->get(self::PAYMENT_NAME_CONFIG_NAME),
             self::PAYMENT_STATUS_PAGE_TYPE_CONFIG_NAME =>
                 $this->config->get(self::PAYMENT_STATUS_PAGE_TYPE_CONFIG_NAME),
+            self::PAYMENT_HPP_PAY_TYPE =>
+                $this->config->get(self::PAYMENT_HPP_PAY_TYPE),
             self::PAYMENT_API_URL_CONFIG_NAME =>
                 $this->config->get(self::PAYMENT_API_URL_CONFIG_NAME),
             self::PAYMENT_SERVICE_CODE_CONFIG_NAME =>
@@ -225,6 +241,22 @@ class Config
     public function getStatusPageType(): string
     {
         return $this->config->get(self::PAYMENT_STATUS_PAGE_TYPE_CONFIG_NAME) ?? self::DEFAULT_STATUS_PAGE_TYPE;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getPaymentTypes(): array
+    {
+        return self::HPP_PAY_TYPES;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPaymentType(): string
+    {
+        return $this->config->get(self::PAYMENT_HPP_PAY_TYPE) ?? self::HPP_PAY_TYPE_PURCHASE;
     }
 
     public function getApiUrl(): string

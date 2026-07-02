@@ -11,3 +11,4 @@ $_MODULE['<{alliancepay}prestashop>payment_c1d979bb64871e42e9d35c09762679f6'] = 
 $_MODULE['<{alliancepay}prestashop>payment_50362aa5a846010bb82f783fe8ddda2d'] = 'Оплата через захищену сторінку Альянс Банку.';
 $_MODULE['<{alliancepay}prestashop>payment_4e33b61812cee2c7d4745f3324d6ebd9'] = 'Вас буде перенаправлено на сторінку оплати.';
 $_MODULE['<{alliancepay}prestashop>refundprocessor_4b0ec232008fdb835f038e282e913b3d'] = 'Помилка повернення коштів.';
+$_MODULE['<{alliancepay}prestashop>alliancepay_a2a_refund_not_allowed'] = 'Повернення коштів через банк неможливе для цього типу замовлення (A2A).';

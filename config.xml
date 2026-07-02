@@ -2,8 +2,9 @@
 <module>
     <name>alliancepay</name>
     <displayName><![CDATA[AlliancePay Payment Gateway]]></displayName>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <description><![CDATA[AlliancePay платіжний модуль для Prestashop від Alliance Bank]]></description>
+    <confirmUninstall><![CDATA[Are you sure you want to uninstall this module?]]></confirmUninstall>
     <author><![CDATA[Alliance Dgtl. https://alb.ua/uk]]></author>
     <tab><![CDATA[payments_gateways]]></tab>
     <is_configurable>1</is_configurable>

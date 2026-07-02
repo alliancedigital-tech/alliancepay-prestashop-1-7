@@ -114,6 +114,11 @@ class RefundProcessor extends AbstractProcessor
     {
         $allianceOrderRepository = $em->getRepository(\AlliancePay\Entity\AllianceOrder::class);
         $allianceOrder = $allianceOrderRepository->findByOrderId($orderId);
+
+        if (empty($allianceOrder)) {
+            throw new Exception('Alliance order not found');
+        }
+
         $operationId = $allianceOrder->getOperationId();
 
         $refundData = $this->prepareRefundData(
@@ -171,6 +176,18 @@ class RefundProcessor extends AbstractProcessor
         }
 
         return $result;
+    }
+
+    /**
+     * @param AllianceOrder $allianceOrder
+     * @return bool
+     */
+    public function assertRefundAllowed(AllianceOrder $allianceOrder): bool
+    {
+        return !(
+            $allianceOrder->getHppPayType() === Config::HPP_PAY_TYPE_A2A
+            && $allianceOrder->getTransactionType() === Config::TRANSACTION_TYPE_A2A
+        );
     }
 
     /**

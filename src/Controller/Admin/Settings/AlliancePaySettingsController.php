@@ -55,6 +55,7 @@ class AlliancePaySettingsController extends FrameworkBundleAdminController
                 'config' => $config,
                 'order_states' => $this->config->getOrderStates(),
                 'status_page_types' => $this->config->getStatusPageTypes(),
+                'hpp_pay_types' => $this->config->getPaymentTypes(),
                 'save_url' => $this->router->generate('alliance.save.config', [], true),
                 'auth_url' => $this->router->generate('alliance.authorize.by.virtual.device', [], true)
             ]

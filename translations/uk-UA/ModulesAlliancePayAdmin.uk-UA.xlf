@@ -98,6 +98,14 @@
         <source>No</source>
         <target>Ні</target>
       </trans-unit>
+       <trans-unit id="25">
+       <source>HPP payment type</source>
+       <target>Тип платежу HPP</target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Refund via bank Alliance is not available for this order (A2A).</source>
+        <target>Повернення коштів через банк Alliance неможливе для цього замовлення (A2A).</target>
+      </trans-unit>
       </body>
   </file>
 </xliff>

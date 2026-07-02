@@ -35,7 +35,7 @@ class Alliancepay extends PaymentModule
     {
         $this->name = 'alliancepay';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.1';
+        $this->version = '1.1.0';
         $this->author = 'Alliance Dgtl.';
         $this->bootstrap = true;
         $this->active = true;
@@ -58,7 +58,8 @@ class Alliancepay extends PaymentModule
             'displayHeader',
             'actionOrderSlipAdd',
             'displayAdminOrderTabContent',
-            'displayAdminOrderTabLink'
+            'displayAdminOrderTabLink',
+            'hookDisplayAdminOrderTop',
         ];
         foreach ($hooks as $hook) {
             if (!$this->registerHook($hook)) {
@@ -165,6 +166,19 @@ class Alliancepay extends PaymentModule
                 return;
             }
 
+            /** @var \AlliancePay\Entity\AllianceOrder|null $allianceOrder */
+            $allianceOrder = $entityManager
+                ->getRepository(\AlliancePay\Entity\AllianceOrder::class)
+                ->findByOrderId((string) $order->id);
+
+            if ($allianceOrder !== null && !$refundProcessor->assertRefundAllowed($allianceOrder)) {
+                $this->context->container->get('session')
+                    ->getFlashBag()
+                    ->add('warning', $this->l('Refund via bank Alliance is not available for this order (A2A).'));
+
+                return;
+            }
+
             /** @var OrderSlip $orderSlip */
             $orderSlip = $order->getOrderSlipsCollection()->getLast();
             $amountToRefund = $orderSlip->total_shipping_tax_incl + $orderSlip->total_products_tax_incl;
@@ -175,15 +189,43 @@ class Alliancepay extends PaymentModule
         }
     }
 
-    public function hookDisplayAdminOrderTabLink(array $params)
+    /**
+     * @param array $params
+     * @return string
+     */
+    public function hookDisplayAdminOrderTop(array $params): string
     {
-        return [
-            'id'    => 'alliancepay-tab',
-            'title' => $this->l('Extra info'),
-        ];
+        $orderId = (int) $params['id_order'];
+        $entityManager = $this->context->container->get('doctrine.orm.entity_manager');
+
+        /** @var \AlliancePay\Entity\AllianceOrder|null $allianceOrder */
+        $allianceOrder = $entityManager
+            ->getRepository(\AlliancePay\Entity\AllianceOrder::class)
+            ->findByOrderId((string) $orderId);
+
+        if ($allianceOrder === null
+            || $allianceOrder->getHppPayType() !== \AlliancePay\Config\Config::HPP_PAY_TYPE_A2A
+            || $allianceOrder->getTransactionType() !== \AlliancePay\Config\Config::TRANSACTION_TYPE_A2A
+        ) {
+            return '';
+        }
+
+        $twig = \PrestaShop\PrestaShop\Adapter\SymfonyContainer::getInstance()->get('twig');
+
+        return $twig->render('@Modules/alliancepay/views/templates/admin/order/refund_warning.twig');
     }
 
-    public function hookDisplayAdminOrderTabContent(array $params)
+    public function hookDisplayAdminOrderTabLink(array $params): string
+    {
+        return '<li class="nav-item">'
+            . '<a class="nav-link" id="alliancepay-tab-link" data-toggle="tab"'
+            . ' href="#alliancepay-tab" role="tab">'
+            . $this->l('Extra info')
+            . '</a>'
+            . '</li>';
+    }
+
+    public function hookDisplayAdminOrderTabContent(array $params): string
     {
         $orderId = (int) $params['id_order'];
         $operations = [];
@@ -272,6 +314,7 @@ class Alliancepay extends PaymentModule
             . ' is_callback_returned TINYINT(1) NOT NULL,'
             . ' callback_data LONGTEXT NOT NULL COMMENT \'(DC2Type:json)\','
             . ' expired_order_date DATETIME NOT NULL,'
+            . ' transaction_type SMALLINT DEFAULT NULL,'
             . ' INDEX ALLIANCE_CHECKOUT_INTEGRATION_ORDER_MERCHANT_REQUEST_ID (merchant_request_id),'
             . ' INDEX ALLIANCE_CHECKOUT_INTEGRATION_ORDER_HPP_ORDER_ID (hpp_order_id),'
             . ' INDEX ALLIANCE_CHECKOUT_INTEGRATION_ORDER_MERCHANT_ID (merchant_id),'

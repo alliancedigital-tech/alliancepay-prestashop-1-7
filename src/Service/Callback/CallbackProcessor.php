@@ -69,12 +69,13 @@ class CallbackProcessor
             $order = $this->updateAllianceOrder->updateAllianceOrder($em, $callbackData);
         } catch (Exception $exception) {
             $this->allianceLogger->error($exception->getMessage());
+            return;
         }
 
-        if ($callbackData['orderStatus'] == Config::SUCCESS_ORDER_STATUS) {
+        if (isset($callbackData['orderStatus']) && $callbackData['orderStatus'] == Config::SUCCESS_ORDER_STATUS) {
             $newStateId = $this->ifRefundsSameAsOrderAmount($order->getCoinAmount(), $order->getCallbackData())
                 ? (int) $this->config->getSuccessRefundState() : (int) $this->config->getSuccessOrderState();
-        } elseif ($callbackData['orderStatus'] == Config::FAIL_ORDER_STATUS) {
+        } elseif (isset($callbackData['orderStatus']) && $callbackData['orderStatus'] == Config::FAIL_ORDER_STATUS) {
             $newStateId = (int) $this->config->getFailOrderState();
         }
 

@@ -46,6 +46,22 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>{{ 'HPP payment type'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <select name="ALLIANCE_HPP_PAY_TYPE" class="form-control">
+                        {% for key, payType in hpp_pay_types %}
+                            {% if config.ALLIANCE_HPP_PAY_TYPE == payType %}
+                                <option value="{{ config.ALLIANCE_HPP_PAY_TYPE }}" selected>
+                                    {{ config.ALLIANCE_HPP_PAY_TYPE }}
+                                </option>
+                            {% else %}
+                                <option value="{{ payType }}">
+                                    {{ payType }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>{{ 'API Url'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
                     <input type="text"
                            class="form-control"

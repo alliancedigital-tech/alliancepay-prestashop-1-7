@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace AlliancePay\Model\AllianceOrder;
 
+use AlliancePay\Config\Config;
 use AlliancePay\Entity\AllianceOrder;
 use AlliancePay\Entity\Hydrator\EntityHydrator;
 use AlliancePay\Logger\AllianceLogger;
@@ -71,9 +72,15 @@ class UpdateAllianceOrder
         $order = $repository->findByHppOrderId($hppOrderId);
         $convertedData = $this->convertDataService->camelToSnakeArrayKeys($data);
         $preparedData = $this->prepareCallbackData($order, $convertedData);
+        $operation = $this->getPurchaseOperationFromCallbackData($preparedData);
         $this->entityHydrator->hydrate($order, $preparedData);
         $order->setUpdatedAt($this->dateTimeImmutableProvider->nowUtc());
-        $order->setOperationId($this->getPurchaseOperationIdFromCallbackData($preparedData));
+
+        if (!empty($operation)) {
+            $order->setOperationId($this->getPurchaseOperationIdFromCallbackData($operation));
+            $order->setTransactionType($this->getPurchaseOperationTransactionTypeFromCallbackData($operation));
+        }
+
         $order->setCallbackData($preparedData);
         $order->setIsCallbackReturned(true);
         $em->persist($order);
@@ -136,22 +143,50 @@ class UpdateAllianceOrder
     }
 
     /**
-     * @param $callbackData
-     * @return string
+     * @param $operation
+     * @return string|null
      */
-    private function getPurchaseOperationIdFromCallbackData($callbackData): string
+    private function getPurchaseOperationIdFromCallbackData($operation): ?string
     {
-        $operationId = '';
+        if (!empty($operation['type']) && !empty($operation['operationId'])) {
+            return $operation['operationId'];
+        }
+
+        return null;
+    }
+
+    /**
+     * @param $operation
+     * @return int|null
+     */
+    private function getPurchaseOperationTransactionTypeFromCallbackData($operation): ?int
+    {
+        if (!empty($operation['transactionType'])) {
+            return (int) $operation['transactionType'];
+        }
+
+        return null;
+    }
+
+    /**
+     * @param $callbackData
+     * @return array
+     */
+    private function getPurchaseOperationFromCallbackData($callbackData): array
+    {
+        $purchaseOperation = [];
+        $operationTypes = [
+            Config::OPERATION_TYPE_PURCHASE,
+            Config::OPERATION_TYPE_A2A
+        ];
 
         foreach ($callbackData['operations'] as $operation) {
-            if (isset($operation['type'])
-                && $operation['type'] == 'PURCHASE'
-                && !empty($operation['operationId'])
-            ) {
-                $operationId = $operation['operationId'];
+            if (isset($operation['type']) && in_array($operation['type'], $operationTypes)) {
+                $purchaseOperation = $operation;
             }
         }
-        return $operationId;
+
+        return $purchaseOperation;
     }
 
     /**

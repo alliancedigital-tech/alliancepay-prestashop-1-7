@@ -142,7 +142,7 @@ class PaymentProcessor extends AbstractProcessor
 
         $data = [
             'coinAmount' => $coinAmount,
-            'hppPayType' => Config::HPP_PAY_TYPE,
+            'hppPayType' => $this->config->getPaymentType(),
             'paymentMethods' => Config::PAYMENT_METHODS,
             'language' => $order->getAssociatedLanguage()->getIsoCode(),
             'successUrl' => $confirmationUrl,
@@ -152,6 +152,12 @@ class PaymentProcessor extends AbstractProcessor
             'statusPageType' => $this->config->getStatusPageType(),
             'merchantRequestId'=> $this->generateMerchantRequestId()
         ];
+
+        if ($data['hppPayType'] === Config::HPP_PAY_TYPE_A2A) {
+            $data['directType'] = Config::DIRECT_TYPE_BANK_LINK;
+            $data['priorityBankCode'] = Config::PRIORITY_BANK_CODE;
+            $data['merchantComment'] = 'Payment for order #' . ($order->id ?? '');
+        }
 
         return $data;
     }
