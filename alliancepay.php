@@ -5,8 +5,10 @@
 
 declare(strict_types=1);
 
+use AlliancePay\Config\Config;
 use AlliancePay\Model\Payment\Order\OrderInformation;
 use AlliancePay\Model\Payment\Refund\RefundProcessor;
+use AlliancePay\Service\Completion\CompletionProcessor;
 use Doctrine\ORM\EntityManagerInterface;
 use PrestaShop\PrestaShop\Adapter\CoreException;
 use PrestaShop\PrestaShop\Adapter\ServiceLocator;
@@ -35,7 +37,7 @@ class Alliancepay extends PaymentModule
     {
         $this->name = 'alliancepay';
         $this->tab = 'payments_gateways';
-        $this->version = '1.1.0';
+        $this->version = '1.2.0';
         $this->author = 'Alliance Dgtl.';
         $this->bootstrap = true;
         $this->active = true;
@@ -60,6 +62,7 @@ class Alliancepay extends PaymentModule
             'displayAdminOrderTabContent',
             'displayAdminOrderTabLink',
             'hookDisplayAdminOrderTop',
+            'actionOrderStatusUpdate',
         ];
         foreach ($hooks as $hook) {
             if (!$this->registerHook($hook)) {
@@ -204,8 +207,8 @@ class Alliancepay extends PaymentModule
             ->findByOrderId((string) $orderId);
 
         if ($allianceOrder === null
-            || $allianceOrder->getHppPayType() !== \AlliancePay\Config\Config::HPP_PAY_TYPE_A2A
-            || $allianceOrder->getTransactionType() !== \AlliancePay\Config\Config::TRANSACTION_TYPE_A2A
+            || $allianceOrder->getHppPayType() !== Config::HPP_PAY_TYPE_A2A
+            || $allianceOrder->getTransactionType() !== Config::TRANSACTION_TYPE_A2A
         ) {
             return '';
         }
@@ -264,6 +267,42 @@ class Alliancepay extends PaymentModule
                 $this->context->cookie->alliance_error;
             unset($this->context->cookie->alliance_error);
             $this->context->cookie->write();
+        }
+    }
+
+    /**
+     * @param array $params
+     * @return void
+     * @throws CoreException
+     */
+    public function hookActionOrderStatusUpdate(array $params): void
+    {
+        $newStatusId = (int) $params['newOrderStatus']->id;
+
+        $config = ServiceLocator::get(Config::class);
+        $completionStatusId = (int) $config->getCompletionOrderState();
+
+        if (!$completionStatusId || $newStatusId !== $completionStatusId) {
+            return;
+        }
+
+        $psOrder = new \Order((int) $params['id_order']);
+
+        if ($psOrder->module !== $this->name) {
+            return;
+        }
+
+        $entityManager = $this->getService('doctrine.orm.entity_manager');
+
+        if (!$entityManager instanceof EntityManagerInterface) {
+            return;
+        }
+
+        try {
+            $completionProcessor = ServiceLocator::get(CompletionProcessor::class);
+            $completionProcessor->processCompletion($entityManager, $psOrder);
+        } catch (\Exception $e) {
+            \PrestaShopLogger::addLog('AlliancePay Completion error: ' . $e->getMessage(), 3);
         }
     }
 

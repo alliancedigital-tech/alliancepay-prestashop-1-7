@@ -15,9 +15,13 @@ use AlliancePay\Model\Validator\CustomerDataValidator;
 use AlliancePay\Service\ConvertData\ConvertDataService;
 use AlliancePay\Service\Country\CountryCodeProvider;
 use AlliancePay\Service\Gateway\HttpClient;
+use AlliancePay\Service\Order\UpdateOrderStatus;
 use AlliancePay\Service\Url\UrlProvider;
+use DateTime;
+use DateTimeZone;
 use Exception;
 use AlliancePay\Model\Payment\Processor\AbstractProcessor;
+use PrestaShop\PrestaShop\Core\Localization\Exception\LocalizationException;
 use Tools;
 
 /**
@@ -64,6 +68,11 @@ class PaymentProcessor extends AbstractProcessor
      */
     private $validateCustomerData;
 
+    /**
+     * @var UpdateOrderStatus
+     */
+    private $updateOrderStatus;
+
     public function __construct(
         CountryCodeProvider $countryCodeProvider,
         HttpClient $httpClient,
@@ -73,7 +82,8 @@ class PaymentProcessor extends AbstractProcessor
         Config $config,
         UrlProvider $urlProvider,
         AllianceLogger $allianceLogger,
-        CustomerDataValidator $validateCustomerData
+        CustomerDataValidator $validateCustomerData,
+        UpdateOrderStatus $updateOrderStatus
     ) {
         $this->countryCodeProvider = $countryCodeProvider;
         $this->httpClient = $httpClient;
@@ -84,8 +94,15 @@ class PaymentProcessor extends AbstractProcessor
         $this->urlProvider = $urlProvider;
         $this->logger = $allianceLogger;
         $this->validateCustomerData = $validateCustomerData;
+        $this->updateOrderStatus = $updateOrderStatus;
     }
 
+    /**
+     * @param $context
+     * @param $cart
+     * @param $em
+     * @return array
+     */
     public function processPayment($context, $cart, $em)
     {
 
@@ -102,8 +119,11 @@ class PaymentProcessor extends AbstractProcessor
             if ($order->id && !empty($hppOrderData)) {
                 $resultRequest = $this->httpClient->createOrder($hppOrderData);
 
-                if (isset($resultRequest['message']) && !!$resultRequest['success']) {
-                    throw new Exception($resultRequest['message']);
+                if (isset($resultRequest['msgType'])
+                    && ($resultRequest['msgType'] === 'ERROR' || $resultRequest['msgType'] === 'VALIDATION_ERROR')
+                ) {
+                    $this->logger->error('Create order service error: ', $resultRequest);
+                    throw new Exception('Create order service error.');
                 }
 
                 $preparedData = $this->convertDataService->camelToSnakeArrayKeys(
@@ -116,8 +136,16 @@ class PaymentProcessor extends AbstractProcessor
                 );
 
                 $allianceOrder->setOrderId($order->id);
+                $allianceOrder->setOriginalAuthorizedAmount($hppOrderData['coinAmount']);
                 $em->persist($allianceOrder);
                 $em->flush();
+
+                if ($this->config->getPaymentType() === Config::HPP_PAY_TYPE_PREAUTH) {
+                    $preAuthStateId = (int) $this->config->getPreAuthOrderState();
+                    if ($preAuthStateId) {
+                        $this->updateOrderStatus->updateOrderStatus((int) $order->id, $preAuthStateId);
+                    }
+                }
 
                 return $resultRequest;
             }
@@ -129,10 +157,16 @@ class PaymentProcessor extends AbstractProcessor
         return [];
     }
 
+    /**
+     * @param $order
+     * @param $context
+     * @return array
+     * @throws Exception
+     */
     private function preparePlaceOrderData($order, $context): array
     {
         $precision = $context->getComputingPrecision();
-        $coinAmount = $this->prepareCoinAmount((float) $order->getTotalPaid(), $precision);
+        $coinAmount = $this->prepareCoinAmount((float) $order->total_paid_tax_incl, $precision);
         $customer = $order->getCustomer();
         $confirmationUrl = $this->urlProvider->getConfirmationUrl(
             (int) $order->id_cart,
@@ -159,8 +193,45 @@ class PaymentProcessor extends AbstractProcessor
             $data['merchantComment'] = 'Payment for order #' . ($order->id ?? '');
         }
 
+        if ($data['hppPayType'] === Config::HPP_PAY_TYPE_PREAUTH) {
+            $data['preAuthExpDate'] = $this->resolvePreAuthExpDate(
+                $this->config->getPreAuthExpDate()
+            );
+        }
+
         return $data;
     }
+
+    /**
+     * @param string $option
+     * @return string
+     * @throws Exception
+     */
+    private function resolvePreAuthExpDate(string $option): string
+    {
+        $value = (int) rtrim($option, 'hd');
+        $unit = substr($option, -1);
+
+        $date = new DateTime('now', new DateTimeZone('UTC'));
+
+        if ($unit === 'h') {
+            $date->modify('+' . $value . ' hours');
+        } else {
+            $date->modify('+' . $value . ' days');
+        }
+
+        $date->modify('+30 seconds');
+
+        return preg_replace('/(\.\d{2})\d/', '$1', $date->format('Y-m-d H:i:s.vP'));
+    }
+
+    /**
+     * @param $context
+     * @param $order
+     * @param $customer
+     * @return array
+     * @throws LocalizationException
+     */
     private function prepareCustomerData($context, $order, $customer): array
     {
         $data = [];

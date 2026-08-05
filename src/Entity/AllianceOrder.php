@@ -159,6 +159,13 @@ class AllianceOrder
      */
     private $transactionType;
 
+    /**
+     * @var int|null
+     *
+     * @ORM\Column(name="original_authorized_amount", type="integer", nullable=true)
+     */
+    private $originalAuthorizedAmount;
+
     public function __construct(
         DateTimeImmutableProvider $dateTimeImmutableProvider
     ) {
@@ -457,6 +464,23 @@ class AllianceOrder
     }
 
     /**
+     * @return int|null
+     */
+    public function getOriginalAuthorizedAmount(): ?int
+    {
+        return $this->originalAuthorizedAmount;
+    }
+
+    /**
+     * @param int|null $originalAuthorizedAmount
+     * @return void
+     */
+    public function setOriginalAuthorizedAmount(?int $originalAuthorizedAmount): void
+    {
+        $this->originalAuthorizedAmount = $originalAuthorizedAmount;
+    }
+
+    /**
      * @return array
      */
     public function toArray(): array
@@ -479,6 +503,7 @@ class AllianceOrder
             'callbackData' => $this->getCallbackData(),
             'expiredOrderDate' => $this->getExpiredOrderDate(),
             'transactionType' => $this->getTransactionType(),
+            'originalAuthorizedAmount' => $this->getOriginalAuthorizedAmount(),
         ];
     }
 }

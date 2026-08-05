@@ -10,15 +10,12 @@ namespace AlliancePay\Service\Callback;
 
 use AlliancePay\Config\Config;
 use AlliancePay\Entity\AllianceOrder;
-use AlliancePay\Entity\Hydrator\EntityHydrator;
 use AlliancePay\Logger\AllianceLogger;
 use AlliancePay\Model\AllianceOrder\UpdateAllianceOrder;
-use AlliancePay\Service\ConvertData\ConvertDataService;
-use AlliancePay\Model\DateTime\DateTimeImmutableProvider;
 use AlliancePay\Service\Order\UpdateOrderStatus;
-use Context;
-use DateTimeImmutable;
 use Exception;
+use Order;
+use Validate;
 
 /**
  * Class CallBackProcessor.
@@ -58,10 +55,9 @@ class CallbackProcessor
     }
 
     /**
+     * @param $em
      * @param $callbackData
      * @return void
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException\
      */
     public function processCallback($em, $callbackData): void
     {
@@ -72,7 +68,25 @@ class CallbackProcessor
             return;
         }
 
-        if (isset($callbackData['orderStatus']) && $callbackData['orderStatus'] == Config::SUCCESS_ORDER_STATUS) {
+        $operationType = $callbackData['operation']['type'] ?? null;
+
+        if ($operationType === Config::OPERATION_TYPE_PREAUTH) {
+            $this->syncOrderPayment($order);
+            return;
+        }
+
+        if ($operationType === Config::OPERATION_TYPE_COMPLETION && !empty($callbackData['operation']['coinAmount'])) {
+            $this->syncOrderPayment($order, $callbackData['operation']['coinAmount']);
+            $completionStateId = (int) $this->config->getCompletionOrderState();
+            if ($completionStateId) {
+                $this->updateOrderStatus->updateOrderStatus($order->getOrderId(), $completionStateId);
+            }
+            return;
+        }
+
+        if (isset($callbackData['orderStatus'])
+            && $callbackData['orderStatus'] == Config::SUCCESS_ORDER_STATUS
+        ) {
             $newStateId = $this->ifRefundsSameAsOrderAmount($order->getCoinAmount(), $order->getCallbackData())
                 ? (int) $this->config->getSuccessRefundState() : (int) $this->config->getSuccessOrderState();
         } elseif (isset($callbackData['orderStatus']) && $callbackData['orderStatus'] == Config::FAIL_ORDER_STATUS) {
@@ -103,5 +117,34 @@ class CallbackProcessor
         }
 
         return $coinAmount === $refundAmount;
+    }
+
+    private function syncOrderPayment(AllianceOrder $allianceOrder, ?int $newCoinAmount = null): void
+    {
+        $psOrder = new Order($allianceOrder->getOrderId());
+
+        if (!Validate::isLoadedObject($psOrder)) {
+            $this->allianceLogger->error(
+                'Order not found for syncOrderPayment, id: ' . $allianceOrder->getOrderId()
+            );
+            return;
+        }
+        $coinAmount = $newCoinAmount ?? $allianceOrder->getCoinAmount();
+        $amount = round($coinAmount / 100, 2);
+        $transactionId = $allianceOrder->getOperationId();
+        $payments = $psOrder->getOrderPaymentCollection();
+
+        if ($payments->count() > 0) {
+            /** @var \OrderPayment $payment */
+            $payment = $payments->getFirst();
+            $payment->amount = $amount;
+            $payment->transaction_id = $transactionId;
+            $payment->update();
+
+            $psOrder->total_paid_real = $amount;
+            $psOrder->update();
+        } else {
+            $psOrder->addOrderPayment($amount, null, $transactionId);
+        }
     }
 }

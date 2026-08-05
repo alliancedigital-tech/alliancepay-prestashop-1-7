@@ -26,8 +26,11 @@ class Config
     public const PAYMENT_METHODS = ['CARD', 'APPLE_PAY', 'GOOGLE_PAY'];
     public const HPP_PAY_TYPE_PURCHASE = 'PURCHASE';
     public const HPP_PAY_TYPE_A2A = 'A2A';
+    public const HPP_PAY_TYPE_PREAUTH = 'PREAUTH';
     public const OPERATION_TYPE_A2A = 'ACCOUNT_2_ACCOUNT';
     public const OPERATION_TYPE_PURCHASE = 'PURCHASE';
+    public const OPERATION_TYPE_PREAUTH = 'PREAUTH';
+    public const OPERATION_TYPE_COMPLETION = 'COMPLETION';
     public const DIRECT_TYPE_BANK_LINK = 'BANK_LINK';
     public const PRIORITY_BANK_CODE = 'ALL_BANKS';
     public const PAYMENT_ENABLED_CONFIG_NAME = 'ALLIANCE_PAY_ENABLED';
@@ -49,6 +52,9 @@ class Config
     public const PAYMENT_FAIL_ORDER_STATE_CONFIG_NAME = 'ALLIANCE_PAY_FAIL_ORDER';
     public const PAYMENT_SUCCESS_REFUND_ORDER_STATE_CONFIG_NAME = 'ALLIANCE_PAY_SUCCESS_REFUND_ORDER_STATE';
     public const PAYMENT_FAIL_REFUND_ORDER_STATE_CONFIG_NAME = 'ALLIANCE_PAY_FAIL_REFUND_ORDER_STATE';
+    public const PAYMENT_PREAUTH_EXP_DATE_CONFIG_NAME = 'ALLIANCE_PAY_PREAUTH_EXP_DATE';
+    public const PAYMENT_PREAUTH_ORDER_STATE_CONFIG_NAME = 'ALLIANCE_PAY_PREAUTH_ORDER_STATE';
+    public const PAYMENT_COMPLETION_ORDER_STATE_CONFIG_NAME = 'ALLIANCE_PAY_COMPLETION_ORDER_STATE';
 
     public const PAYMENT_ALL_CONFIG_NAMES = [
         self::PAYMENT_ENABLED_CONFIG_NAME,
@@ -65,6 +71,9 @@ class Config
         self::PAYMENT_FAIL_ORDER_STATE_CONFIG_NAME,
         self::PAYMENT_SUCCESS_REFUND_ORDER_STATE_CONFIG_NAME,
         self::PAYMENT_FAIL_REFUND_ORDER_STATE_CONFIG_NAME,
+        self::PAYMENT_PREAUTH_EXP_DATE_CONFIG_NAME,
+        self::PAYMENT_PREAUTH_ORDER_STATE_CONFIG_NAME,
+        self::PAYMENT_COMPLETION_ORDER_STATE_CONFIG_NAME,
     ];
 
     public const SENSITIVE_DATA_FIELD_REFRESH_TOKEN = 'refreshToken';
@@ -98,6 +107,19 @@ class Config
     public const HPP_PAY_TYPES = [
         self::HPP_PAY_TYPE_PURCHASE,
         self::HPP_PAY_TYPE_A2A,
+        self::HPP_PAY_TYPE_PREAUTH,
+    ];
+
+    public const PREAUTH_EXP_DATE_OPTIONS = [
+        '2h',
+        '4h',
+        '6h',
+        '12h',
+        '1d',
+        '2d',
+        '7d',
+        '14d',
+        '28d',
     ];
 
     public const SUCCESS_ORDER_STATUS = 'SUCCESS';
@@ -109,6 +131,9 @@ class Config
 
     public const TRANSACTION_TYPE_A2A = 102;
 
+    /**
+     * @var Configuration
+     */
     private $config;
 
     /**
@@ -132,6 +157,9 @@ class Config
     private $language;
 
 
+    /**
+     * @var AllianceLogger
+     */
     private $logger;
 
 
@@ -156,11 +184,19 @@ class Config
         $this->logger = $logger;
     }
 
+    /**
+     * @return bool
+     */
     public function isEnabled(): bool
     {
         return (bool) $this->config->get(self::PAYMENT_ENABLED_CONFIG_NAME);
     }
 
+    /**
+     * @param bool $value
+     * @return void
+     * @throws Exception
+     */
     public function setEnabled(bool $value): void
     {
         $this->config->set(self::PAYMENT_ENABLED_CONFIG_NAME, $value);
@@ -202,6 +238,12 @@ class Config
                 $this->config->get(self::PAYMENT_SUCCESS_REFUND_ORDER_STATE_CONFIG_NAME),
             self::PAYMENT_FAIL_REFUND_ORDER_STATE_CONFIG_NAME =>
                 $this->config->get(self::PAYMENT_FAIL_REFUND_ORDER_STATE_CONFIG_NAME),
+            self::PAYMENT_PREAUTH_EXP_DATE_CONFIG_NAME =>
+                $this->config->get(self::PAYMENT_PREAUTH_EXP_DATE_CONFIG_NAME),
+            self::PAYMENT_PREAUTH_ORDER_STATE_CONFIG_NAME =>
+                $this->config->get(self::PAYMENT_PREAUTH_ORDER_STATE_CONFIG_NAME),
+            self::PAYMENT_COMPLETION_ORDER_STATE_CONFIG_NAME =>
+                $this->config->get(self::PAYMENT_COMPLETION_ORDER_STATE_CONFIG_NAME),
         ];
     }
 
@@ -216,6 +258,9 @@ class Config
         $this->config->set($configName, $configValue);
     }
 
+    /**
+     * @return array
+     */
     public function getOrderStates(): array
     {
         $preparedOrderStates[0] = '';
@@ -230,6 +275,9 @@ class Config
         return $preparedOrderStates;
     }
 
+    /**
+     * @return string[]
+     */
     public function getStatusPageTypes(): array
     {
         return self::PAYMENT_STATUS_PAGE_TYPES;
@@ -259,31 +307,49 @@ class Config
         return $this->config->get(self::PAYMENT_HPP_PAY_TYPE) ?? self::HPP_PAY_TYPE_PURCHASE;
     }
 
+    /**
+     * @return string
+     */
     public function getApiUrl(): string
     {
         return $this->config->get(self::PAYMENT_API_URL_CONFIG_NAME) ?? '';
     }
 
+    /**
+     * @return string
+     */
     public function getDeviceId(): string
     {
         return $this->config->get(self::PAYMENT_DEVICE_ID_CONFIG_NAME) ?? '';
     }
 
+    /**
+     * @return string
+     */
     public function getRefreshToken(): string
     {
         return $this->config->get(self::PAYMENT_REFRESH_TOKEN_CONFIG_NAME) ?? '';
     }
 
+    /**
+     * @return string
+     */
     public function getServiceCode(): string
     {
         return $this->config->get(self::PAYMENT_SERVICE_CODE_CONFIG_NAME) ?? '';
     }
 
+    /**
+     * @return string
+     */
     public function getAuthorizationKey(): string
     {
         return $this->config->get(self::PAYMENT_AUTHORIZATION_KEY_CONFIG_NAME) ?? '';
     }
 
+    /**
+     * @return string
+     */
     public function getServerPublicKey(): string
     {
         return $this->config->get(self::PAYMENT_SERVER_PUBLIC_KEY_CONFIG_NAME) ?? '';
@@ -327,6 +393,38 @@ class Config
     public function getFailRefundState(): string
     {
         return $this->config->get(self::PAYMENT_FAIL_REFUND_ORDER_STATE_CONFIG_NAME) ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getPreAuthExpDate(): string
+    {
+        return $this->config->get(self::PAYMENT_PREAUTH_EXP_DATE_CONFIG_NAME) ?? '2h';
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getPreAuthExpDateOptions(): array
+    {
+        return self::PREAUTH_EXP_DATE_OPTIONS;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPreAuthOrderState(): string
+    {
+        return $this->config->get(self::PAYMENT_PREAUTH_ORDER_STATE_CONFIG_NAME) ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getCompletionOrderState(): string
+    {
+        return $this->config->get(self::PAYMENT_COMPLETION_ORDER_STATE_CONFIG_NAME) ?? '';
     }
 
     /**

@@ -144,6 +144,7 @@ services:
       $urlProvider: '@alliance.url.provider'
       $allianceLogger: '@alliance.logger'
       $validateCustomerData: '@alliance.validate.customer.data'
+      $updateOrderStatus: '@alliance.order.update.staus'
 
   alliance.payment.processor.wrapper:
     class: AlliancePay\Model\Payment\PaymentProcessorWrapper
@@ -222,3 +223,13 @@ services:
     arguments:
         $dateTimeNormalizer: '@alliance.datetime.normalizer'
         $logger: '@alliance.logger'
+
+  alliance.completion.processor:
+    class: AlliancePay\Service\Completion\CompletionProcessor
+    public: true
+    arguments:
+      $httpClient: '@AlliancePay\Service\Gateway\HttpClient'
+      $config: '@alliance.config'
+      $urlProvider: '@alliance.url.provider'
+      $dateTimeNormalizer: '@alliance.datetime.normalizer'
+      $allianceLogger: '@alliance.logger'

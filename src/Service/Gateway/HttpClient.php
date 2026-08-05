@@ -31,11 +31,19 @@ class HttpClient
     private const REQUEST_CONTENT_TYPE_JSON = 'application/json';
 
     private const X_API_VERSION = 'V1';
+
     private const ENDPOINT_CREATE_ORDER = '/ecom/execute_request/hpp/v1/create-order';
+
     private const ENDPOINT_OPERATIONS = '/ecom/execute_request/hpp/v1/operations';
+
     private const ENDPOINT_REFUND = '/ecom/execute_request/payments/v3/refund';
+
+    private const ENDPOINT_COMPLETION = '/ecom/execute_request/payments/v1/completion';
+
     private const ENDPOINT_AUTHORIZE = '/api-gateway/authorize_virtual_device';
+
     private const MAX_AUTH_ATTEMPTS = 3;
+
     private $authCounter;
 
     /**
@@ -125,6 +133,17 @@ class HttpClient
     public function refund(array $refundData): array
     {
         $serverPublicKey = json_decode($this->config->getServerPublicKey(), true);
+
+        if (empty($serverPublicKey)) {
+            $this->allianceLogger->error('Server public key is empty.');
+
+            return [
+                'success' => false,
+                'message' => 'Server public key is empty.',
+            ];
+
+        }
+
         $encryptedRefundData = $this->jweEncryptionService->encrypt(
             $refundData,
             $serverPublicKey
@@ -166,10 +185,48 @@ class HttpClient
     }
 
     /**
-     * @param string $hppOrderId
+     * @param array $completionData
      * @return array
      * @throws Exception
      */
+    public function executeCompletion(array $completionData): array
+    {
+        $serverPublicKey = json_decode($this->config->getServerPublicKey(), true);
+
+        if (empty($serverPublicKey)) {
+            $this->allianceLogger->error('Server public key is empty.');
+
+            return ['success' => false, 'message' => 'Server public key is empty.'];
+        }
+
+        $encryptedData = $this->jweEncryptionService->encrypt($completionData, $serverPublicKey);
+
+        try {
+            $response = $this->sendRequest(
+                self::METHOD_POST,
+                self::ENDPOINT_COMPLETION,
+                $encryptedData,
+                self::REQUEST_CONTENT_TYPE_TEXT
+            );
+        } catch (RequestException $e) {
+            $this->allianceLogger->error('Completion failed: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Completion failed: ' . $e->getMessage()];
+        }
+
+        $decodedResponse = json_decode($response->getBody()->getContents(), true);
+        if (isset($decodedResponse['jwe'])) {
+            $decryptedResponse = $this->jweEncryptionService->decrypt(
+                $this->config->getAuthorizationKey(),
+                $decodedResponse['jwe']
+            );
+            if (!empty($decryptedResponse)) {
+                return $decryptedResponse;
+            }
+        }
+
+        return ['success' => false, 'message' => 'Failed to execute completion.'];
+    }
+
     public function getOrderOperations(string $hppOrderId): array
     {
         try {

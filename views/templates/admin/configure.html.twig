@@ -62,6 +62,36 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>{{ 'PreAuth expiration period'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <select name="ALLIANCE_PAY_PREAUTH_EXP_DATE" class="form-control">
+                        {% for option in preauth_exp_date_options %}
+                            <option value="{{ option }}" {{ config.ALLIANCE_PAY_PREAUTH_EXP_DATE == option ? 'selected' }}>
+                                {{ option }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'PreAuth order state'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <select name="ALLIANCE_PAY_PREAUTH_ORDER_STATE" class="form-control">
+                        {% for id, state_name in order_states %}
+                            <option value="{{ id }}" {{ config.ALLIANCE_PAY_PREAUTH_ORDER_STATE == id ? 'selected' }}>
+                                {{ state_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Completion trigger order state'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <select name="ALLIANCE_PAY_COMPLETION_ORDER_STATE" class="form-control">
+                        {% for id, state_name in order_states %}
+                            <option value="{{ id }}" {{ config.ALLIANCE_PAY_COMPLETION_ORDER_STATE == id ? 'selected' }}>
+                                {{ state_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>{{ 'API Url'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
                     <input type="text"
                            class="form-control"
