@@ -50,6 +50,8 @@ class AlliancePaySettingsController extends FrameworkBundleAdminController
     {
         $config = $this->config->getAllSettings();
 
+        $shopCurrencyIso = $this->config->getShopCurrencyIsoCode();
+
         return $this->render('@Modules/alliancepay/views/templates/admin/configure.html.twig',
             [
                 'config' => $config,
@@ -57,6 +59,7 @@ class AlliancePaySettingsController extends FrameworkBundleAdminController
                 'status_page_types' => $this->config->getStatusPageTypes(),
                 'hpp_pay_types' => $this->config->getPaymentTypes(),
                 'preauth_exp_date_options' => $this->config->getPreAuthExpDateOptions(),
+                'shop_currency_iso' => $shopCurrencyIso,
                 'save_url' => $this->router->generate('alliance.save.config', [], true),
                 'auth_url' => $this->router->generate('alliance.authorize.by.virtual.device', [], true)
             ]

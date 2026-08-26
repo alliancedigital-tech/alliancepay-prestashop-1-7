@@ -166,6 +166,20 @@ class AllianceOrder
      */
     private $originalAuthorizedAmount;
 
+    /**
+     * @var int|null
+     *
+     * @ORM\Column(name="currency_code", type="smallint", nullable=true)
+     */
+    private $currencyCode = null;
+
+    /**
+     * @var float|null
+     *
+     * @ORM\Column(name="conversion_rate", type="decimal", precision=20, scale=8, nullable=true)
+     */
+    private $conversionRate = null;
+
     public function __construct(
         DateTimeImmutableProvider $dateTimeImmutableProvider
     ) {
@@ -481,6 +495,40 @@ class AllianceOrder
     }
 
     /**
+     * @return int|null
+     */
+    public function getCurrencyCode(): ?int
+    {
+        return $this->currencyCode;
+    }
+
+    /**
+     * @param int|null $currencyCode
+     * @return void
+     */
+    public function setCurrencyCode(?int $currencyCode): void
+    {
+        $this->currencyCode = $currencyCode;
+    }
+
+    /**
+     * @return float|null
+     */
+    public function getConversionRate(): ?float
+    {
+        return $this->conversionRate !== null ? (float) $this->conversionRate : null;
+    }
+
+    /**
+     * @param float|null $conversionRate
+     * @return void
+     */
+    public function setConversionRate(?float $conversionRate): void
+    {
+        $this->conversionRate = $conversionRate;
+    }
+
+    /**
      * @return array
      */
     public function toArray(): array
@@ -504,6 +552,8 @@ class AllianceOrder
             'expiredOrderDate' => $this->getExpiredOrderDate(),
             'transactionType' => $this->getTransactionType(),
             'originalAuthorizedAmount' => $this->getOriginalAuthorizedAmount(),
+            'currencyCode' => $this->getCurrencyCode(),
+            'conversionRate' => $this->getConversionRate(),
         ];
     }
 }

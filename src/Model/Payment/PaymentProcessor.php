@@ -17,6 +17,7 @@ use AlliancePay\Service\Country\CountryCodeProvider;
 use AlliancePay\Service\Gateway\HttpClient;
 use AlliancePay\Service\Order\UpdateOrderStatus;
 use AlliancePay\Service\Url\UrlProvider;
+use Currency;
 use DateTime;
 use DateTimeZone;
 use Exception;
@@ -137,6 +138,11 @@ class PaymentProcessor extends AbstractProcessor
 
                 $allianceOrder->setOrderId($order->id);
                 $allianceOrder->setOriginalAuthorizedAmount($hppOrderData['coinAmount']);
+
+                if (isset($hppOrderData['currencyCode'])) {
+                    $allianceOrder->setCurrencyCode((int) $hppOrderData['currencyCode']);
+                }
+
                 $em->persist($allianceOrder);
                 $em->flush();
 
@@ -191,6 +197,13 @@ class PaymentProcessor extends AbstractProcessor
             $data['directType'] = Config::DIRECT_TYPE_BANK_LINK;
             $data['priorityBankCode'] = Config::PRIORITY_BANK_CODE;
             $data['merchantComment'] = 'Payment for order #' . ($order->id ?? '');
+        }
+
+        if ($data['hppPayType'] === Config::HPP_PAY_TYPE_PURCHASE
+            || $data['hppPayType'] === Config::HPP_PAY_TYPE_PREAUTH
+        ) {
+            $currencyIso = strtoupper(Currency::getIsoCodeById((int) $order->id_currency));
+            $data['currencyCode'] = $this->config->getCurrencyCode($currencyIso);
         }
 
         if ($data['hppPayType'] === Config::HPP_PAY_TYPE_PREAUTH) {

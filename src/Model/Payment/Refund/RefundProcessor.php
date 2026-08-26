@@ -120,10 +120,17 @@ class RefundProcessor extends AbstractProcessor
         }
 
         $operationId = $allianceOrder->getOperationId();
+        $precision = $context->getComputingPrecision();
+
+        $coinAmountForRefund = $this->resolveCoinAmountForRefund(
+            $allianceOrder,
+            (float) $amount,
+            $precision
+        );
 
         $refundData = $this->prepareRefundData(
             $operationId,
-            $this->prepareCoinAmount((float) $amount, $context->getComputingPrecision()),
+            $coinAmountForRefund,
             $this->urlProvider->getCallbackUrl()
         );
 
@@ -161,13 +168,13 @@ class RefundProcessor extends AbstractProcessor
         ) {
             $result = [
                 'success' => true,
-                'transaction_id' => $refundEntity->getOperationId(),
+                'transaction_id' => $refundEntity->getOperationId() ?? '',
             ];
         }
 
         if ($refundEntity->getStatus() === Config::REFUND_STATUS_FAIL) {
             $result['success'] = false;
-            $result['message'] = $context->l('Refund service error.');
+            $result['message'] = \Module::getInstanceByName('alliancepay')->l('Refund service error.');
 
             $this->updateOrderStatus->updateOrderStatus(
                 (int) $refundEntity->getOrderId(),
@@ -188,6 +195,53 @@ class RefundProcessor extends AbstractProcessor
             $allianceOrder->getHppPayType() === Config::HPP_PAY_TYPE_A2A
             && $allianceOrder->getTransactionType() === Config::TRANSACTION_TYPE_A2A
         );
+    }
+
+    /**
+     * @param AllianceOrder $allianceOrder
+     * @param float $amount
+     * @param int $precision
+     * @return int
+     */
+    private function resolveCoinAmountForRefund(
+        AllianceOrder $allianceOrder,
+        float $amount,
+        int $precision
+    ): int {
+        $conversionRate = $allianceOrder->getConversionRate() ?? 1.0;
+
+        $refundCoinAmountConverted = (int) round(
+            $this->prepareCoinAmount($amount, $precision) * $conversionRate
+        );
+
+        $originalCoinAmount = $allianceOrder->getCoinAmount();
+
+        if ($refundCoinAmountConverted >= $originalCoinAmount) {
+            return $this->resolveFullRefundCoinAmount($allianceOrder);
+        }
+
+        return $refundCoinAmountConverted;
+    }
+
+    /**
+     * @param AllianceOrder $allianceOrder
+     * @return int
+     */
+    private function resolveFullRefundCoinAmount(AllianceOrder $allianceOrder): int
+    {
+        if ($allianceOrder->getHppPayType() === Config::HPP_PAY_TYPE_PREAUTH) {
+            $callbackData = $allianceOrder->getCallbackData();
+
+            foreach ($callbackData['operations'] ?? [] as $operation) {
+                if (isset($operation['type'], $operation['coinAmount'])
+                    && $operation['type'] === Config::OPERATION_TYPE_COMPLETION
+                ) {
+                    return (int) $operation['coinAmount'];
+                }
+            }
+        }
+
+        return $allianceOrder->getCoinAmount();
     }
 
     /**

@@ -76,7 +76,14 @@ class CallbackProcessor
         }
 
         if ($operationType === Config::OPERATION_TYPE_COMPLETION && !empty($callbackData['operation']['coinAmount'])) {
-            $this->syncOrderPayment($order, $callbackData['operation']['coinAmount']);
+            $conversionRate = $order->getConversionRate();
+            $completionCoinAmount = $callbackData['operation']['coinAmount'];
+
+            if (!is_null($conversionRate) && $conversionRate > 1.0) {
+                $completionCoinAmount = (int)round($completionCoinAmount / $conversionRate);
+            }
+
+            $this->syncOrderPayment($order, $completionCoinAmount);
             $completionStateId = (int) $this->config->getCompletionOrderState();
             if ($completionStateId) {
                 $this->updateOrderStatus->updateOrderStatus($order->getOrderId(), $completionStateId);

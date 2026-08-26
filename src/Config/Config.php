@@ -8,7 +8,9 @@ declare(strict_types=1);
 namespace AlliancePay\Config;
 
 use AlliancePay\Logger\AllianceLogger;
+use Currency;
 use Exception;
+use InvalidArgumentException;
 use PrestaShop\PrestaShop\Adapter\Configuration;
 use PrestaShop\PrestaShop\Adapter\Language\LanguageDataProvider;
 use PrestaShop\PrestaShop\Core\Localization\Locale;
@@ -131,6 +133,12 @@ class Config
 
     public const TRANSACTION_TYPE_A2A = 102;
 
+    public const CURRENCY_CODES = [
+        'UAH' => 980,
+        'USD' => 840,
+        'EUR' => 978,
+    ];
+
     /**
      * @var Configuration
      */
@@ -161,7 +169,6 @@ class Config
      * @var AllianceLogger
      */
     private $logger;
-
 
     /**
      * @param Configuration $configuration
@@ -472,6 +479,32 @@ class Config
         } catch (Exception $exception) {
             $this->logger->error($exception->getMessage());
         }
+    }
+
+    /**
+     * @param string $code ISO alpha code, e.g. 'UAH', 'USD', 'EUR'
+     * @return int
+     * @throws InvalidArgumentException when $code is not one of the supported currencies
+     */
+    public function getCurrencyCode(string $code): int
+    {
+        if (!array_key_exists($code, self::CURRENCY_CODES)) {
+            throw new InvalidArgumentException(
+                'Unsupported currency code: "' . $code
+                . '". Supported currencies: ' . implode(', ', array_keys(self::CURRENCY_CODES)) . '.'
+            );
+        }
+
+        return self::CURRENCY_CODES[$code];
+    }
+
+    /**
+     * @return string
+     */
+    public function getShopCurrencyIsoCode(): string
+    {
+        $defaultId = (int) $this->config->get('PS_CURRENCY_DEFAULT');
+        return strtoupper(Currency::getIsoCodeById($defaultId));
     }
 
     /**

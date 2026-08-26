@@ -55,7 +55,7 @@ class AllianceRefundOrder
     /**
      * @var string
      *
-     * @ORM\Column(name="rrn", type="string", nullable=false, length=255)
+     * @ORM\Column(name="rrn", type="string", nullable=true, length=255)
      */
     private $rrn;
 
@@ -90,7 +90,7 @@ class AllianceRefundOrder
     /**
      * @var string
      *
-     * @ORM\Column(name="operation_id", type="string", length=255, nullable=false)
+     * @ORM\Column(name="operation_id", type="string", length=255, nullable=true)
      */
     private $operationId;
 
@@ -188,14 +188,14 @@ class AllianceRefundOrder
     /**
      * @var string
      *
-     * @ORM\Column(name="processing_merchant_id", type="string", length=255, nullable=false)
+     * @ORM\Column(name="processing_merchant_id", type="string", length=255, nullable=true)
      */
     private $processingMerchantId;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="processing_terminal_id", type="string", length=255, nullable=false)
+     * @ORM\Column(name="processing_terminal_id", type="string", length=255, nullable=true)
      */
     private $processingTerminalId;
 
@@ -340,12 +340,12 @@ class AllianceRefundOrder
         $this->type = $type;
     }
 
-    /**
-     * @return string
-     */
-    public function getRrn(): string
-    {
-        return $this->rrn;
+     /**
+      * @return string|null
+      */
+     public function getRrn(): ?string
+     {
+         return $this->rrn;
     }
 
     /**
@@ -404,12 +404,12 @@ class AllianceRefundOrder
         $this->coinAmount = $coinAmount;
     }
 
-    /**
-     * @return string
-     */
-    public function getOperationId(): string
-    {
-        return $this->operationId;
+     /**
+      * @return string|null
+      */
+     public function getOperationId(): ?string
+     {
+         return $this->operationId;
     }
 
     /**
@@ -628,12 +628,12 @@ class AllianceRefundOrder
         $this->description = $description;
     }
 
-    /**
-     * @return string
-     */
-    public function getProcessingMerchantId(): string
-    {
-        return $this->processingMerchantId;
+     /**
+      * @return string|null
+      */
+     public function getProcessingMerchantId(): ?string
+     {
+         return $this->processingMerchantId;
     }
 
     /**

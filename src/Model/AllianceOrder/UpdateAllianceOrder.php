@@ -79,6 +79,11 @@ class UpdateAllianceOrder
         if (!empty($operation)) {
             $order->setOperationId($this->getPurchaseOperationIdFromCallbackData($operation));
             $order->setTransactionType($this->getPurchaseOperationTransactionTypeFromCallbackData($operation));
+
+            $conversionRate = $this->getConversionRateFromOperation($operation);
+            if ($conversionRate !== null) {
+                $order->setConversionRate($conversionRate);
+            }
         }
 
         $order->setCallbackData($preparedData);
@@ -107,7 +112,9 @@ class UpdateAllianceOrder
         if (!empty($orderCallBackData)) {
             $operations = [];
             foreach ($callbackData['operations'] as $operation) {
-                if (!$this->checkIfAlreadyExistOperation($operation['operationId'], $orderCallBackData['operations'])) {
+                if (!empty($operation['operationId']) && !$this->checkIfAlreadyExistOperation($operation['operationId'], $orderCallBackData['operations'])) {
+                    $operations[] = $operation;
+                } else if (empty($operation['operationId'])) {
                     $operations[] = $operation;
                 }
             }
@@ -163,6 +170,19 @@ class UpdateAllianceOrder
     {
         if (!empty($operation['transactionType'])) {
             return (int) $operation['transactionType'];
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array $operation
+     * @return float|null
+     */
+    private function getConversionRateFromOperation(array $operation): ?float
+    {
+        if (isset($operation['conversionRate']) && $operation['conversionRate'] !== null) {
+            return (float) $operation['conversionRate'];
         }
 
         return null;

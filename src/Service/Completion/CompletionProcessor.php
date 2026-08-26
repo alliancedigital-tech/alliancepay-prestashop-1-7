@@ -65,7 +65,10 @@ class CompletionProcessor extends AbstractProcessor
 
         $context = Context::getContext();
         $precision = $context->getComputingPrecision();
-        $currentCoinAmount = $this->prepareCoinAmount((float) $psOrder->total_paid_tax_incl, $precision);
+        $conversionRate = $allianceOrder->getConversionRate() ?? 1.0;
+        $amount = (float) $psOrder->total_paid_tax_incl;
+        $amount = $this->prepareCoinAmount($amount, $precision);
+
         $originalAmount = $allianceOrder->getOriginalAuthorizedAmount();
 
         if ($originalAmount === null) {
@@ -76,16 +79,23 @@ class CompletionProcessor extends AbstractProcessor
         $minAllowed = (int)round($originalAmount * 0.8);
         $maxAllowed = (int)round($originalAmount * 1.2);
 
-        if ($currentCoinAmount < $minAllowed || $currentCoinAmount > $maxAllowed) {
+        if ($amount < $minAllowed || $amount > $maxAllowed) {
             $this->allianceLogger->error(
-                'Completion amount ' . $currentCoinAmount
+                'Completion amount ' . $amount
+                . ' (conversion rate: ' . $conversionRate . ')'
                 . ' is out of allowed range [' . $minAllowed . ', ' . $maxAllowed . ']'
             );
             throw new Exception(
-                'Completion amount ' . $currentCoinAmount
+                'Completion amount ' . $amount
                 . ' is out of allowed range [' . $minAllowed . ', ' . $maxAllowed . ']'
             );
         }
+
+        if ($conversionRate > 1.0) {
+            $amount = (int)round($amount * $conversionRate);
+        }
+
+        $currentCoinAmount = $amount;
 
         $completionData = [
             'merchantRequestId' => $this->generateMerchantRequestId(),

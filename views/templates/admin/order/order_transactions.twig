@@ -19,7 +19,7 @@
             {% for operation in operations %}
                 <tr>
                     <td>{{ operation.type }}</td>
-                    <td>{{ operation.operationId }}</td>
+                    <td>{{ operation.operationId ?? 'N/A' }}</td>
                     <td>{{ operation.creationDateTime }}</td>
                     <td>
                         <span class="badge badge-info">{{ operation.status }}</span>

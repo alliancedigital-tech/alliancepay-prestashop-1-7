@@ -37,7 +37,7 @@ class Alliancepay extends PaymentModule
     {
         $this->name = 'alliancepay';
         $this->tab = 'payments_gateways';
-        $this->version = '1.2.0';
+        $this->version = '1.3.0';
         $this->author = 'Alliance Dgtl.';
         $this->bootstrap = true;
         $this->active = true;
@@ -354,6 +354,9 @@ class Alliancepay extends PaymentModule
             . ' callback_data LONGTEXT NOT NULL COMMENT \'(DC2Type:json)\','
             . ' expired_order_date DATETIME NOT NULL,'
             . ' transaction_type SMALLINT DEFAULT NULL,'
+            . ' original_authorized_amount INT DEFAULT NULL,'
+            . ' currency_code SMALLINT(3) DEFAULT NULL,'
+            . ' conversion_rate DECIMAL(20,8) DEFAULT NULL,'
             . ' INDEX ALLIANCE_CHECKOUT_INTEGRATION_ORDER_MERCHANT_REQUEST_ID (merchant_request_id),'
             . ' INDEX ALLIANCE_CHECKOUT_INTEGRATION_ORDER_HPP_ORDER_ID (hpp_order_id),'
             . ' INDEX ALLIANCE_CHECKOUT_INTEGRATION_ORDER_MERCHANT_ID (merchant_id),'
