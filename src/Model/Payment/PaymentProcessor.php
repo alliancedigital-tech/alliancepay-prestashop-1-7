@@ -14,6 +14,7 @@ use AlliancePay\Config\Config;
 use AlliancePay\Model\Validator\CustomerDataValidator;
 use AlliancePay\Service\ConvertData\ConvertDataService;
 use AlliancePay\Service\Country\CountryCodeProvider;
+use AlliancePay\Service\Customer\CustomerDataBuilder;
 use AlliancePay\Service\Gateway\HttpClient;
 use AlliancePay\Service\Order\UpdateOrderStatus;
 use AlliancePay\Service\Url\UrlProvider;
@@ -247,42 +248,7 @@ class PaymentProcessor extends AbstractProcessor
      */
     private function prepareCustomerData($context, $order, $customer): array
     {
-        $data = [];
-
-        if (!$customer->isGuest()) {
-            if ($customer->birthday !== '0000-00-00') {
-                $data['senderBirthday'] = $customer->birthday ?? '';
-            }
-            $data['senderCustomerId'] = $customer->id;
-        } else {
-            $data['senderCustomerId'] = (string) $customer->id ?? $customer->email;
-        }
-        $customerAddress = $customer->getSimpleAddress($order->id_address_delivery);
-        if ($customer->id_gender == '1') {
-            $customerGender = 'Male';
-        } else if ($customer->id_gender == '2') {
-            $customerGender = 'Female';
-        } else {
-            $customerGender = 'Other';
-        }
-
-        $countryCode = $this->countryCodeProvider->getCountryNumericCodeByAlpha2($context->country->iso_code);
-        $data['senderEmail'] = $customer->email ?? '';
-        $data['senderFirstName'] = $customer->firstname ?? '';
-        $data['senderLastName'] = $customer->lastname ?? '';
-        $data['senderRegion'] = $customerAddress['state'] ?? '';
-        $data['senderStreet'] = $customerAddress['address1'] ?? '';
-        $data['senderCity'] = $customerAddress['city'] ?? '';
-        $data['senderZipCode'] = $customerAddress['postcode'] ?? '';
-        $data['senderPhone'] = $customerAddress['phone'] ?? $customerAddress['phone_mobile'] ?? '';
-        $data['senderAdditionalAddress'] = $customerAddress['address2'] ?? '';
-        $data['senderIp'] = Tools::getRemoteAddr();
-        $data['senderGender'] = $customerGender;
-
-        if (!empty($countryCode)) {
-            $data['senderCountry'] = $countryCode;
-        }
-
-        return $this->validateCustomerData->validate($data);
+        return (new CustomerDataBuilder($this->countryCodeProvider, $this->validateCustomerData))
+            ->build($context, $order, $customer);
     }
 }

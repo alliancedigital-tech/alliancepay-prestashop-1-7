@@ -1,0 +1,147 @@
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-header-title">{{ 'Plan'|trans({}, 'ModulesAlliancePayAdmin') }} #{{ plan.id }}: {{ plan.name }}</h3>
+        </div>
+        <div class="card-body">
+            {% if plan.status == 'ERROR' %}
+                <div class="alert alert-danger">
+                    <p><strong>{{ 'The infinite schedule is not set for this plan.'|trans({}, 'ModulesAlliancePayAdmin') }}</strong></p>
+                    <p>{{ plan.syncError }}</p>
+                    <form method="post" action="{{ path('alliance.admin.subscription.plan_retry_sync', {id: plan.id}) }}">
+                        <button class="btn btn-danger" type="submit">{{ 'Retry infinite schedule'|trans({}, 'ModulesAlliancePayAdmin') }}</button>
+                    </form>
+                </div>
+            {% endif %}
+            <dl class="row">
+                <dt class="col-sm-3">{{ 'Product'|trans({}, 'ModulesAlliancePayAdmin') }}</dt><dd class="col-sm-9">{{ product_name }}</dd>
+                <dt class="col-sm-3">{{ 'Provider plan'|trans({}, 'ModulesAlliancePayAdmin') }}</dt><dd class="col-sm-9"><code>{{ plan.providerPlanId }}</code></dd>
+                <dt class="col-sm-3">{{ 'Version'|trans({}, 'ModulesAlliancePayAdmin') }}</dt><dd class="col-sm-9"><code>{{ plan.versionId }}</code></dd>
+                <dt class="col-sm-3">{{ 'Status'|trans({}, 'ModulesAlliancePayAdmin') }}</dt><dd class="col-sm-9">{{ plan.status }}</dd>
+                <dt class="col-sm-3">{{ 'Category indicator'|trans({}, 'ModulesAlliancePayAdmin') }}</dt><dd class="col-sm-9">{{ plan.categoryIndicator }}</dd>
+                <dt class="col-sm-3">{{ 'Active subscriptions'|trans({}, 'ModulesAlliancePayAdmin') }}</dt><dd class="col-sm-9">{{ active_subscriptions }}</dd>
+                <dt class="col-sm-3">{{ 'Offered to new customers'|trans({}, 'ModulesAlliancePayAdmin') }}</dt>
+                <dd class="col-sm-9">
+                    {{ plan.active ? 'Yes'|trans({}, 'ModulesAlliancePayAdmin') : 'No'|trans({}, 'ModulesAlliancePayAdmin') }}
+                    <form method="post" class="d-inline ml-2" action="{{ path('alliance.admin.subscription.plan_toggle_offered', {id: plan.id}) }}">
+                        <button class="btn btn-outline-secondary btn-sm" type="submit">
+                            {{ plan.active ? 'Stop offering to new customers'|trans({}, 'ModulesAlliancePayAdmin') : 'Offer to new customers'|trans({}, 'ModulesAlliancePayAdmin') }}
+                        </button>
+                    </form>
+                    {% if plan.active %}
+                        <small class="form-text text-muted">{{ 'Stopping is local only: the plan stays active at the provider and current subscribers are charged on the old terms.'|trans({}, 'ModulesAlliancePayAdmin') }}</small>
+                    {% endif %}
+                </dd>
+            </dl>
+
+            <h4>{{ 'Current rules'|trans({}, 'ModulesAlliancePayAdmin') }}</h4>
+            <table class="table">
+                <thead><tr><th>{{ 'Payments'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th>{{ 'Every'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th>{{ 'Amount'|trans({}, 'ModulesAlliancePayAdmin') }}</th></tr></thead>
+                <tbody>
+                    {% for rule in plan.rules %}
+                        <tr>
+                            <td>{{ rule.paymentNumberFrom }}&ndash;{{ rule.paymentNumberTo }}</td>
+                            <td>{{ rule.intervalValue }} {{ rule.intervalUnit }}</td>
+                            <td>{{ (rule.coinAmount / 100)|number_format(2, '.', ' ') }} ({{ rule.currency }})</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if can_archive %}
+        <div class="card">
+            <div class="card-header"><h3 class="card-header-title">{{ 'Archive at the provider'|trans({}, 'ModulesAlliancePayAdmin') }}</h3></div>
+            <div class="card-body">
+                <p>{{ 'This plan is no longer offered and has no active subscriptions. You can archive it at the provider.'|trans({}, 'ModulesAlliancePayAdmin') }}</p>
+                {% if has_elevated_rights %}
+                    <form method="post" action="{{ path('alliance.admin.subscription.plan_archive', {id: plan.id}) }}"
+                          onsubmit="return confirm('{{ 'Archive this plan at the provider?'|trans({}, 'ModulesAlliancePayAdmin')|e('js') }}');">
+                        <button class="btn btn-danger" type="submit">{{ 'Archive at the provider'|trans({}, 'ModulesAlliancePayAdmin') }}</button>
+                    </form>
+                {% else %}
+                    <p class="text-muted">{{ 'You do not have the rights to perform this action.'|trans({}, 'ModulesAlliancePayAdmin') }}</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header"><h3 class="card-header-title">{{ 'Change prices for all current subscribers'|trans({}, 'ModulesAlliancePayAdmin') }}</h3></div>
+        <div class="card-body">
+            {% if not has_elevated_rights %}
+                <p class="text-muted">{{ 'You do not have the rights to perform this action.'|trans({}, 'ModulesAlliancePayAdmin') }}</p>
+            {% else %}
+                <div class="alert alert-warning">
+                    {{ 'This action affects ALL current subscribers of the plan.'|trans({}, 'ModulesAlliancePayAdmin') }}
+                    <strong>{{ 'Active subscriptions'|trans({}, 'ModulesAlliancePayAdmin') }}: {{ active_subscriptions }}</strong>.
+                    {{ 'To change prices only for new customers create a new plan and stop offering this one instead.'|trans({}, 'ModulesAlliancePayAdmin') }}
+                </div>
+                <form method="post" action="{{ path('alliance.admin.subscription.plan_reprice', {id: plan.id}) }}"
+                      onsubmit="return confirm('{{ 'Apply the new rules to all subscribers of this plan?'|trans({}, 'ModulesAlliancePayAdmin')|e('js') }}');">
+                    {% include '@Modules/alliancepay/views/templates/admin/subscription/_rules_editor.html.twig' with {
+                        rules: plan.rules, table_id: 'alliance-reprice-rules', currency_code: plan.currencyCode, interval_units: interval_units
+                    } %}
+                    <div class="form-group mt-3">
+                        <label>{{ 'New rules take effect from (at least %days% days ahead)'|trans({'%days%': min_lead_days}, 'ModulesAlliancePayAdmin') }}</label>
+                        <input type="date" class="form-control" name="effective_from" min="{{ min_date }}" value="{{ min_date }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>{{ 'Reason'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                        <textarea class="form-control" name="reason" rows="2"></textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" name="customers_notified" value="1" id="alliance-notified" required>
+                        <label class="form-check-label" for="alliance-notified">
+                            {{ 'I confirm that customers have been (or will be) notified about the price change.'|trans({}, 'ModulesAlliancePayAdmin') }}
+                        </label>
+                    </div>
+                    <button class="btn btn-danger" type="submit">{{ 'Apply new rules'|trans({}, 'ModulesAlliancePayAdmin') }}</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h3 class="card-header-title">{{ 'Version history'|trans({}, 'ModulesAlliancePayAdmin') }}</h3></div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>{{ 'Date'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Old version'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'New version'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Applies from'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'By'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Reason'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Old / new rules'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in history %}
+                        <tr>
+                            <td>{{ item.createdAt|date('Y-m-d H:i') }}</td>
+                            <td><code>{{ item.oldVersionId }}</code></td>
+                            <td><code>{{ item.newVersionId }}</code></td>
+                            <td>{{ item.appliesFrom ? item.appliesFrom|date('Y-m-d') : '' }}</td>
+                            <td>{{ item.createdBy }}</td>
+                            <td>{{ item.reason }}</td>
+                            <td>
+                                <details><summary>{{ 'Show'|trans({}, 'ModulesAlliancePayAdmin') }}</summary>
+                                    <pre>{{ item.oldRules|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                                    <pre>{{ item.newRules|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                                </details>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="7" class="text-muted">{{ 'No changes yet.'|trans({}, 'ModulesAlliancePayAdmin') }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a class="btn btn-outline-secondary" href="{{ path('alliance.admin.subscription.plans') }}">{{ 'Back'|trans({}, 'ModulesAlliancePayAdmin') }}</a>
+        </div>
+    </div>
+{% endblock %}

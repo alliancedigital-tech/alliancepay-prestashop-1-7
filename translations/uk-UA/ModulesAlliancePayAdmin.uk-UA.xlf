@@ -30,10 +30,6 @@
         <source>API Url</source>
         <target>API URL</target>
       </trans-unit>
-      <trans-unit id="8">
-        <source>Service code</source>
-        <target>Сервісний код (Service Code)</target>
-      </trans-unit>
       <trans-unit id="9">
         <source>Merchant Id</source>
         <target>ID Мерчанта (Merchant Id)</target>
@@ -42,17 +38,21 @@
         <source>Authorization Key</source>
         <target>Ключ авторизації</target>
       </trans-unit>
-      <trans-unit id="11">
-        <source>Device Id</source>
-        <target>ID пристрою (Device Id)</target>
+      <trans-unit id="27">
+        <source>JWS Private Key</source>
+        <target>Приватний ключ JWS</target>
       </trans-unit>
-      <trans-unit id="12">
-        <source>Refresh token</source>
-        <target>Токен оновлення (Refresh token)</target>
+      <trans-unit id="28">
+        <source>RSA private key in PEM format (PKCS#8) for signing JWS tokens (RS256). Keep secret.</source>
+        <target>Приватний ключ RSA у форматі PEM (PKCS#8) для підпису JWS токенів (RS256). Тримайте в секреті.</target>
       </trans-unit>
-      <trans-unit id="13">
-        <source>Auth token</source>
-        <target>Токен авторизації (Auth token)</target>
+      <trans-unit id="29">
+        <source>JWS Key ID (kid)</source>
+        <target>ID ключа JWS (kid)</target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>UUID identifier of the key registered in AIM_Service.</source>
+        <target>UUID ідентифікатор ключа, зареєстрованого в AIM_Service.</target>
       </trans-unit>
       <trans-unit id="14">
         <source>Success order state</source>
@@ -70,16 +70,8 @@
         <source>Refund fail order state</source>
         <target>Статус помилки повернення</target>
       </trans-unit>
-      <trans-unit id="18">
-        <source>Authorize</source>
-        <target>Авторизуватись</target>
-      </trans-unit>
       <trans-unit id="19">
         <source>AlliancePay Settings</source>
-        <target>Налаштування модуля AlliancePay</target>
-      </trans-unit>
-      <trans-unit id="20">
-        <source>Authorize by credentials</source>
         <target>Налаштування модуля AlliancePay</target>
       </trans-unit>
       <trans-unit id="21">
@@ -106,6 +98,642 @@
         <source>Refund via bank Alliance is not available for this order (A2A).</source>
         <target>Повернення коштів через банк Alliance неможливе для цього замовлення (A2A).</target>
       </trans-unit>
-      </body>
+      <trans-unit id="31">
+        <source>- none, enter rules manually -</source>
+        <target>— немає, ввести правила вручну —</target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>A template defines the schedule structure without amounts. A template used by a plan can only be archived.</source>
+        <target>Шаблон описує структуру розкладу без сум. Шаблон, який використовує план, можна лише архівувати.</target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>A template used by plans cannot be edited, archive it instead.</source>
+        <target>Шаблон, який використовують плани, не можна редагувати — архівуйте його.</target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>A template with this code already exists.</source>
+        <target>Шаблон з таким кодом уже існує.</target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Action</source>
+        <target>Дія</target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Active subscriptions</source>
+        <target>Активні підписки</target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Add rule</source>
+        <target>Додати правило</target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Add stage</source>
+        <target>Додати етап</target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>All rules of a plan must use the same currency.</source>
+        <target>Усі правила плану мають бути в одній валюті.</target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>All statuses</source>
+        <target>Усі статуси</target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Amount</source>
+        <target>Сума</target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>An identical plan already exists for this product (provider plan %id%).</source>
+        <target>Ідентичний план для цього товару вже існує (план провайдера %id%).</target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Another plan with identical rules already exists.</source>
+        <target>Інший план з такими самими правилами вже існує.</target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Another request is creating the same plan, try again.</source>
+        <target>Інший запит уже створює такий самий план, спробуйте ще раз.</target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Applies from</source>
+        <target>Діє з</target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Applies from (optional)</source>
+        <target>Діє з (необов’язково)</target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Apply new rules</source>
+        <target>Застосувати нові правила</target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Apply the new rules to all subscribers of this plan?</source>
+        <target>Застосувати нові правила для всіх підписників цього плану?</target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Archive</source>
+        <target>Архівувати</target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Archive at the provider</source>
+        <target>Архівувати у провайдера</target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Archive this plan at the provider?</source>
+        <target>Архівувати цей план у провайдера?</target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Archive this template?</source>
+        <target>Архівувати цей шаблон?</target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>At least one rule is required.</source>
+        <target>Потрібне принаймні одне правило.</target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Back</source>
+        <target>Назад</target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>By</source>
+        <target>Ким</target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Cancel subscription</source>
+        <target>Скасувати підписку</target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Cancel this subscription at the provider?</source>
+        <target>Скасувати цю підписку у провайдера?</target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Category indicator</source>
+        <target>Індикатор категорії</target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Category indicator is required.</source>
+        <target>Індикатор категорії обов’язковий.</target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Change prices for all current subscribers</source>
+        <target>Змінити ціни для всіх поточних підписників</target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Code</source>
+        <target>Код</target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Confirm that customers have been (or will be) notified about the price change.</source>
+        <target>Підтвердіть, що клієнтів повідомлено (або буде повідомлено) про зміну ціни.</target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Could not load operations from the provider:</source>
+        <target>Не вдалося завантажити операції від провайдера:</target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Create plan</source>
+        <target>Створити план</target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Created</source>
+        <target>Створено</target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Current rules</source>
+        <target>Поточні правила</target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Customer</source>
+        <target>Клієнт</target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Date</source>
+        <target>Дата</target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Description</source>
+        <target>Опис</target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Details</source>
+        <target>Деталі</target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Edit</source>
+        <target>Редагувати</target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Edit template</source>
+        <target>Редагування шаблону</target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Every</source>
+        <target>Кожні</target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Filter</source>
+        <target>Фільтрувати</target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>From payment #</source>
+        <target>З платежу №</target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>I confirm that customers have been (or will be) notified about the price change.</source>
+        <target>Підтверджую, що клієнтів повідомлено (або буде повідомлено) про зміну ціни.</target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Infinite schedule set, the plan is active.</source>
+        <target>Безстроковий розклад встановлено, план активний.</target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Invalid "applies from" date.</source>
+        <target>Некоректна дата «Діє з».</target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Invalid date.</source>
+        <target>Некоректна дата.</target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Merchant ID is not configured in the module settings.</source>
+        <target>Merchant ID не налаштовано в параметрах модуля.</target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Name</source>
+        <target>Назва</target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>New plan</source>
+        <target>Новий план</target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>New rules take effect from (at least %days% days ahead)</source>
+        <target>Нові правила діють з (щонайменше через %days% днів)</target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>New subscription plan</source>
+        <target>Новий план підписки</target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>New template</source>
+        <target>Новий шаблон</target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>New version</source>
+        <target>Нова версія</target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>No changes yet.</source>
+        <target>Змін ще немає.</target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>No entries.</source>
+        <target>Записів немає.</target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>No operations.</source>
+        <target>Операцій немає.</target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>No plans yet.</source>
+        <target>Планів ще немає.</target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>No scheduled payments recorded yet.</source>
+        <target>Запланованих платежів ще немає.</target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>No subscriptions yet.</source>
+        <target>Підписок ще немає.</target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>No templates yet.</source>
+        <target>Шаблонів ще немає.</target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Offer to new customers</source>
+        <target>Пропонувати новим клієнтам</target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Offered to new customers</source>
+        <target>Пропонується новим клієнтам</target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Old / new rules</source>
+        <target>Старі / нові правила</target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Old version</source>
+        <target>Стара версія</target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Only a plan that is no longer offered and has no active subscriptions can be archived.</source>
+        <target>Архівувати можна лише план, який більше не пропонується й не має активних підписок.</target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Only an active subscription can be canceled.</source>
+        <target>Скасувати можна лише активну підписку.</target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Only one subscription can be purchased at a time.</source>
+        <target>Одночасно можна оформити лише одну підписку.</target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Open</source>
+        <target>Відкрити</target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Operation</source>
+        <target>Операція</target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Operations at the provider (live)</source>
+        <target>Операції у провайдера (актуальні)</target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Order</source>
+        <target>Замовлення</target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Payments</source>
+        <target>Платежі</target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Plan</source>
+        <target>План</target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Plan amounts differ from the current catalog price of the product.</source>
+        <target>Суми плану відрізняються від поточної ціни товару в каталозі.</target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Plan availability for new customers updated.</source>
+        <target>Доступність плану для нових клієнтів оновлено.</target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Plan created.</source>
+        <target>План створено.</target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Plan name</source>
+        <target>Назва плану</target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Plan name is required.</source>
+        <target>Назва плану обов’язкова.</target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Plan not found.</source>
+        <target>План не знайдено.</target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Plan templates</source>
+        <target>Шаблони планів</target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Plans no longer offered and without active subscriptions can be archived at the provider (manually, from the plan page):</source>
+        <target>Плани, які більше не пропонуються й не мають активних підписок, можна архівувати у провайдера (вручну, зі сторінки плану):</target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Product</source>
+        <target>Товар</target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Provider order</source>
+        <target>Замовлення провайдера</target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Provider plan</source>
+        <target>План провайдера</target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Reason</source>
+        <target>Причина</target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Retries</source>
+        <target>Спроби</target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Retry infinite schedule</source>
+        <target>Повторити безстроковий розклад</target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Review</source>
+        <target>Перевірка</target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Rule #%rule%: amount cannot be negative.</source>
+        <target>Правило №%rule%: сума не може бути від’ємною.</target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Rule #%rule%: currency must be a numeric ISO 4217 code (e.g. 980).</source>
+        <target>Правило №%rule%: валюта має бути числовим кодом ISO 4217 (наприклад, 980).</target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Rule #%rule%: field "%field%" is required.</source>
+        <target>Правило №%rule%: поле «%field%» обов’язкове.</target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Rule #%rule%: field "%field%" must be an integer.</source>
+        <target>Правило №%rule%: поле «%field%» має бути цілим числом.</target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Rule #%rule%: interval must be at least 1.</source>
+        <target>Правило №%rule%: інтервал має бути не меншим за 1.</target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Rule #%rule%: interval unit must be one of %units%.</source>
+        <target>Правило №%rule%: одиниця інтервалу має бути однією з: %units%.</target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Rule #%rule%: invalid payment number range.</source>
+        <target>Правило №%rule%: некоректний діапазон номерів платежів.</target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Rule #%rule%: payment number ranges must be contiguous, expected start %expected%.</source>
+        <target>Правило №%rule%: діапазони номерів платежів мають іти без пропусків, очікується початок %expected%.</target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Rules</source>
+        <target>Правила</target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Rules at signup</source>
+        <target>Правила на момент оформлення</target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Run now</source>
+        <target>Виконати зараз</target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Run this payment at the provider now?</source>
+        <target>Виконати цей платіж у провайдера зараз?</target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Schedule stages</source>
+        <target>Етапи розкладу</target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Scheduled</source>
+        <target>Заплановано</target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Scheduled payments</source>
+        <target>Заплановані платежі</target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Select a product.</source>
+        <target>Оберіть товар.</target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Setting the infinite schedule failed: %error%</source>
+        <target>Не вдалося встановити безстроковий розклад: %error%</target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Show</source>
+        <target>Показати</target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Shows the subscription option on product pages and allows creating subscription plans.</source>
+        <target>Показує вибір підписки на сторінках товарів і дозволяє створювати плани підписок.</target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Stages</source>
+        <target>Етапи</target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Status</source>
+        <target>Статус</target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Stop offering to new customers</source>
+        <target>Більше не пропонувати новим клієнтам</target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Stopping is local only: the plan stays active at the provider and current subscribers are charged on the old terms.</source>
+        <target>Зупинка лише локальна: план лишається активним у провайдера, а поточних підписників списують за старими умовами.</target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Subscription</source>
+        <target>Підписка</target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Subscription audit log</source>
+        <target>Журнал аудиту підписок</target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Subscription not found.</source>
+        <target>Підписку не знайдено.</target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Subscription plans</source>
+        <target>Плани підписок</target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Subscriptions</source>
+        <target>Підписки</target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Subscriptions enabled</source>
+        <target>Підписки увімкнені</target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>TRIAL stages are charged 0, PAID stages are charged the plan price.</source>
+        <target>За етапи TRIAL списується 0, за етапи PAID — ціна плану.</target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Template</source>
+        <target>Шаблон</target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Template archived.</source>
+        <target>Шаблон архівовано.</target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Template code is required (letters, digits, "-" and "_").</source>
+        <target>Код шаблону обов’язковий (літери, цифри, «-» та «_»).</target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Template name is required.</source>
+        <target>Назва шаблону обов’язкова.</target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Template not found.</source>
+        <target>Шаблон не знайдено.</target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Template saved.</source>
+        <target>Шаблон збережено.</target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>The catalog price of the selected product prefills the amounts (you can edit them).</source>
+        <target>Ціна обраного товару з каталогу підставляється в суми (їх можна змінити).</target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>The infinite schedule is not set for this plan.</source>
+        <target>Для цього плану не встановлено безстроковий розклад.</target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>The new rules are scheduled for all subscribers of the plan.</source>
+        <target>Нові правила заплановано для всіх підписників плану.</target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>The new rules cannot take effect earlier than %days% days from now.</source>
+        <target>Нові правила не можуть діяти раніше ніж через %days% днів.</target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>The new version was created, but setting the infinite schedule failed: %error%. Use "Retry infinite schedule" on the plan page.</source>
+        <target>Нову версію створено, але встановити безстроковий розклад не вдалося: %error%. Скористайтеся «Повторити безстроковий розклад» на сторінці плану.</target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>The payment was requested at the provider, the result arrives via callback.</source>
+        <target>Платіж запрошено у провайдера, результат прийде через колбек.</target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>The plan was archived at the provider.</source>
+        <target>План архівовано у провайдера.</target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>The plan was created at the provider, but setting the infinite schedule failed: %error%. Use "Retry infinite schedule" on the plan page.</source>
+        <target>План створено у провайдера, але встановити безстроковий розклад не вдалося: %error%. Скористайтеся «Повторити безстроковий розклад» на сторінці плану.</target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>The provider could not cancel the subscription: %error%</source>
+        <target>Провайдер не зміг скасувати підписку: %error%</target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>The provider rejected the new rules: %error%</source>
+        <target>Провайдер відхилив нові правила: %error%</target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>The provider rejected the plan: %error%</source>
+        <target>Провайдер відхилив план: %error%</target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>The provider rejected the status change: %error%</source>
+        <target>Провайдер відхилив зміну статусу: %error%</target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>The provider rejected the trigger: %error%</source>
+        <target>Провайдер відхилив запуск: %error%</target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>The subscription was canceled.</source>
+        <target>Підписку скасовано.</target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>This action affects ALL current subscribers of the plan.</source>
+        <target>Ця дія стосується ВСІХ поточних підписників плану.</target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>This payment has no provider scheduled payment id, it cannot be triggered.</source>
+        <target>У цього платежу немає ідентифікатора запланованого платежу провайдера, його не можна запустити.</target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>This plan is no longer offered and has no active subscriptions. You can archive it at the provider.</source>
+        <target>Цей план більше не пропонується й не має активних підписок. Його можна архівувати у провайдера.</target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>This template is used by plans and cannot be edited, archive it instead.</source>
+        <target>Цей шаблон використовують плани, його не можна редагувати — архівуйте його.</target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>To change prices only for new customers create a new plan and stop offering this one instead.</source>
+        <target>Щоб змінити ціни лише для нових клієнтів, створіть новий план і перестаньте пропонувати цей.</target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>To payment #</source>
+        <target>До платежу №</target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Type</source>
+        <target>Тип</target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Type at least 2 characters of the product name</source>
+        <target>Введіть щонайменше 2 символи назви товару</target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Unit</source>
+        <target>Одиниця</target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Unknown stage type.</source>
+        <target>Невідомий тип етапу.</target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Used by plans</source>
+        <target>Використовується планами</target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>User</source>
+        <target>Користувач</target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Version</source>
+        <target>Версія</target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Version history</source>
+        <target>Історія версій</target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>View</source>
+        <target>Переглянути</target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>You do not have the rights to perform this action.</source>
+        <target>У вас немає прав на цю дію.</target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>needs review</source>
+        <target>потребує перевірки</target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>price differs</source>
+        <target>ціна відрізняється</target>
+      </trans-unit>
+    </body>
   </file>
 </xliff>

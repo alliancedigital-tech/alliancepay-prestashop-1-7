@@ -1,0 +1,56 @@
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-header-title">{{ 'Subscription plans'|trans({}, 'ModulesAlliancePayAdmin') }}</h3>
+        </div>
+        <div class="card-body">
+            <a class="btn btn-primary mb-3" href="{{ path('alliance.admin.subscription.plan_new') }}">{{ 'New plan'|trans({}, 'ModulesAlliancePayAdmin') }}</a>
+            {% if archive_candidates|length %}
+                <div class="alert alert-info">
+                    {{ 'Plans no longer offered and without active subscriptions can be archived at the provider (manually, from the plan page):'|trans({}, 'ModulesAlliancePayAdmin') }}
+                    {% for id in archive_candidates %}<a href="{{ path('alliance.admin.subscription.plan', {id: id}) }}">#{{ id }}</a>{{ loop.last ? '' : ', ' }}{% endfor %}
+                </div>
+            {% endif %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>{{ 'Product'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Name'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Provider plan'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Status'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Offered to new customers'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Active subscriptions'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in plans %}
+                        {% set plan = item.entity %}
+                        <tr>
+                            <td>{{ plan.id }}</td>
+                            <td>{{ item.product_name }}</td>
+                            <td>
+                                {{ plan.name }}
+                                {% if item.catalog_price_differs %}
+                                    <span class="badge badge-warning" title="{{ 'Plan amounts differ from the current catalog price of the product.'|trans({}, 'ModulesAlliancePayAdmin') }}">{{ 'price differs'|trans({}, 'ModulesAlliancePayAdmin') }}</span>
+                                {% endif %}
+                            </td>
+                            <td><code>{{ plan.providerPlanId }}</code></td>
+                            <td>
+                                <span class="badge {{ plan.status == 'ACTIVE' ? 'badge-success' : (plan.status == 'ERROR' ? 'badge-danger' : 'badge-secondary') }}">{{ plan.status }}</span>
+                            </td>
+                            <td>{{ plan.active ? 'Yes'|trans({}, 'ModulesAlliancePayAdmin') : 'No'|trans({}, 'ModulesAlliancePayAdmin') }}</td>
+                            <td>{{ item.active_subscriptions }}</td>
+                            <td class="text-right"><a class="btn btn-outline-secondary btn-sm" href="{{ path('alliance.admin.subscription.plan', {id: plan.id}) }}">{{ 'Open'|trans({}, 'ModulesAlliancePayAdmin') }}</a></td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="8" class="text-muted">{{ 'No plans yet.'|trans({}, 'ModulesAlliancePayAdmin') }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

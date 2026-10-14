@@ -1,0 +1,91 @@
+{#
+ # Structured editor of plan rules: one form row = one rule object (no free-form JSON).
+ # Params: rules (list, coinAmount in minor units), table_id, currency_code, interval_units, name (default "rules")
+ #}
+{% set field_name = name|default('rules') %}
+<table class="table alliance-rules" id="{{ table_id }}"
+       data-name="{{ field_name }}" data-currency="{{ currency_code }}" data-units="{{ interval_units|json_encode|e('html_attr') }}">
+    <thead>
+        <tr>
+            <th>{{ 'From payment #'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+            <th>{{ 'To payment #'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+            <th>{{ 'Every'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+            <th>{{ 'Unit'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+            <th>{{ 'Amount'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for rule in rules %}
+            {% set i = loop.index0 %}
+            <tr>
+                <td><input type="number" min="1" class="form-control" name="{{ field_name }}[{{ i }}][paymentNumberFrom]" value="{{ rule.paymentNumberFrom|default('') }}"></td>
+                <td><input type="number" min="1" class="form-control" name="{{ field_name }}[{{ i }}][paymentNumberTo]" value="{{ rule.paymentNumberTo|default('') }}"></td>
+                <td><input type="number" min="1" class="form-control" name="{{ field_name }}[{{ i }}][intervalValue]" value="{{ rule.intervalValue|default('') }}"></td>
+                <td>
+                    <select class="form-control" name="{{ field_name }}[{{ i }}][intervalUnit]">
+                        {% for unit in interval_units %}
+                            <option value="{{ unit }}" {{ rule.intervalUnit|default('') == unit ? 'selected' }}>{{ unit }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="{{ field_name }}[{{ i }}][coinAmount]"
+                           value="{{ rule.coinAmount is defined and rule.coinAmount is not null and rule.coinAmount is not same as('') ? (rule.coinAmount / 100)|number_format(2, '.', '') : '' }}">
+                    <input type="hidden" name="{{ field_name }}[{{ i }}][currency]" value="{{ rule.currency|default(currency_code) }}">
+                </td>
+                <td><button type="button" class="btn btn-outline-danger btn-sm" data-alliance-remove-row>&times;</button></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<button type="button" class="btn btn-outline-secondary btn-sm" data-alliance-add-rule="{{ table_id }}">
+    + {{ 'Add rule'|trans({}, 'ModulesAlliancePayAdmin') }}
+</button>
+<script>
+    (function () {
+        if (window.AlliancePayRules) { return; }
+
+        function rowHtml(table, index, values) {
+            var name = table.dataset.name;
+            var units = JSON.parse(table.dataset.units);
+            var options = units.map(function (unit) {
+                return '<option value="' + unit + '"' + (values.intervalUnit === unit ? ' selected' : '') + '>' + unit + '</option>';
+            }).join('');
+
+            return '<tr>' +
+                '<td><input type="number" min="1" class="form-control" name="' + name + '[' + index + '][paymentNumberFrom]" value="' + (values.paymentNumberFrom || '') + '"></td>' +
+                '<td><input type="number" min="1" class="form-control" name="' + name + '[' + index + '][paymentNumberTo]" value="' + (values.paymentNumberTo || '') + '"></td>' +
+                '<td><input type="number" min="1" class="form-control" name="' + name + '[' + index + '][intervalValue]" value="' + (values.intervalValue || '') + '"></td>' +
+                '<td><select class="form-control" name="' + name + '[' + index + '][intervalUnit]">' + options + '</select></td>' +
+                '<td><input type="text" class="form-control" name="' + name + '[' + index + '][coinAmount]" value="' + (values.amount !== undefined ? values.amount : '') + '">' +
+                '<input type="hidden" name="' + name + '[' + index + '][currency]" value="' + table.dataset.currency + '"></td>' +
+                '<td><button type="button" class="btn btn-outline-danger btn-sm" data-alliance-remove-row>&times;</button></td>' +
+                '</tr>';
+        }
+
+        window.AlliancePayRules = {
+            addRow: function (tableId, values) {
+                var table = document.getElementById(tableId);
+                var body = table.querySelector('tbody');
+                body.insertAdjacentHTML('beforeend', rowHtml(table, body.children.length, values || {}));
+            },
+            clear: function (tableId) {
+                document.getElementById(tableId).querySelector('tbody').innerHTML = '';
+            }
+        };
+
+        document.addEventListener('click', function (event) {
+            var add = event.target.closest('[data-alliance-add-rule]');
+            if (add) {
+                window.AlliancePayRules.addRow(add.dataset.allianceAddRule);
+                return;
+            }
+            var remove = event.target.closest('[data-alliance-remove-row]');
+            if (remove) {
+                var row = remove.closest('tr');
+                row.parentNode.removeChild(row);
+            }
+        });
+    })();
+</script>

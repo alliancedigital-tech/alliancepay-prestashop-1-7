@@ -70,6 +70,13 @@ class UpdateAllianceOrder
         }
 
         $order = $repository->findByHppOrderId($hppOrderId);
+
+        if ($order === null) {
+            $this->allianceLogger->error('Alliance order not found for hppOrderId: ' . $hppOrderId);
+
+            return null;
+        }
+
         $convertedData = $this->convertDataService->camelToSnakeArrayKeys($data);
         $preparedData = $this->prepareCallbackData($order, $convertedData);
         $operation = $this->getPurchaseOperationFromCallbackData($preparedData);
@@ -86,7 +93,7 @@ class UpdateAllianceOrder
             }
         }
 
-        $order->setCallbackData($preparedData);
+        $order->setCallbackData(array_merge($order->getCallbackData(), $preparedData));
         $order->setIsCallbackReturned(true);
         $em->persist($order);
 
@@ -108,17 +115,19 @@ class UpdateAllianceOrder
     {
         $orderCallBackData = $order->getCallbackData();
         $callbackData = $this->prepareOperations($callbackData);
+        $callbackData['operations'] = $callbackData['operations'] ?? [];
 
         if (!empty($orderCallBackData)) {
+            $storedOperations = $orderCallBackData['operations'] ?? [];
             $operations = [];
             foreach ($callbackData['operations'] as $operation) {
-                if (!empty($operation['operationId']) && !$this->checkIfAlreadyExistOperation($operation['operationId'], $orderCallBackData['operations'])) {
+                if (!empty($operation['operationId']) && !$this->checkIfAlreadyExistOperation($operation['operationId'], $storedOperations)) {
                     $operations[] = $operation;
                 } else if (empty($operation['operationId'])) {
                     $operations[] = $operation;
                 }
             }
-            $callbackData['operations'] = array_merge($orderCallBackData['operations'], $operations);
+            $callbackData['operations'] = array_merge($storedOperations, $operations);
         }
 
         return $callbackData;
@@ -219,7 +228,7 @@ class UpdateAllianceOrder
     private function checkIfAlreadyExistOperation(string $operationId, array $callbackOperations): bool
     {
         foreach ($callbackOperations as $callbackOperation) {
-            if ($callbackOperation['operationId'] === $operationId) {
+            if (($callbackOperation['operationId'] ?? null) === $operationId) {
                 return true;
             }
         }

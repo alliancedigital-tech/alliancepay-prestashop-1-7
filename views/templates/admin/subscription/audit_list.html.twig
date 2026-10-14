@@ -1,0 +1,33 @@
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header"><h3 class="card-header-title">{{ 'Subscription audit log'|trans({}, 'ModulesAlliancePayAdmin') }}</h3></div>
+        <div class="card-body">
+            <form method="get" class="form-inline mb-3" action="{{ path('alliance.admin.subscription.audit') }}">
+                <input type="text" class="form-control mr-2" name="action" value="{{ action_filter }}" placeholder="{{ 'Action'|trans({}, 'ModulesAlliancePayAdmin') }}">
+                <button class="btn btn-outline-secondary" type="submit">{{ 'Filter'|trans({}, 'ModulesAlliancePayAdmin') }}</button>
+            </form>
+            <table class="table">
+                <thead>
+                    <tr><th>#</th><th>{{ 'Date'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th>{{ 'Action'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th>{{ 'Plan'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th>{{ 'Subscription'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th>{{ 'User'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th>{{ 'Details'|trans({}, 'ModulesAlliancePayAdmin') }}</th></tr>
+                </thead>
+                <tbody>
+                    {% for entry in entries %}
+                        <tr>
+                            <td>{{ entry.id }}</td>
+                            <td>{{ entry.createdAt|date('Y-m-d H:i:s') }}</td>
+                            <td>{{ entry.action }}</td>
+                            <td>{{ entry.planId }}</td>
+                            <td>{{ entry.subscriptionId }}</td>
+                            <td>{{ entry.userId }}</td>
+                            <td><code>{{ entry.details|json_encode }}</code></td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="7" class="text-muted">{{ 'No entries.'|trans({}, 'ModulesAlliancePayAdmin') }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

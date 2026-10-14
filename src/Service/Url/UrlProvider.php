@@ -21,9 +21,7 @@ class UrlProvider
      */
     public function getCallbackUrl(): string
     {
-        $link = $this->getLink();
-
-        return $link->getBaseLink() . 'index.php?fc=module&module=alliancepay&controller=callback';
+        return $this->getLink()->getModuleLink(Config::MODULE_NAME, 'callback', [], true);
     }
 
     public function getConfirmationUrl(int $cartId, int $orderId, string $customerSecureKey): string

@@ -1,0 +1,43 @@
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-header-title">{{ 'Subscriptions'|trans({}, 'ModulesAlliancePayAdmin') }}</h3>
+        </div>
+        <div class="card-body">
+            <form method="get" class="form-inline mb-3" action="{{ path('alliance.admin.subscription.subscriptions') }}">
+                <select name="status" class="form-control mr-2">
+                    <option value="">{{ 'All statuses'|trans({}, 'ModulesAlliancePayAdmin') }}</option>
+                    {% for item in statuses %}<option value="{{ item }}" {{ status == item ? 'selected' }}>{{ item }}</option>{% endfor %}
+                </select>
+                <button class="btn btn-outline-secondary" type="submit">{{ 'Filter'|trans({}, 'ModulesAlliancePayAdmin') }}</button>
+            </form>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th><th>{{ 'Order'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th>{{ 'Customer'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Plan'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th>{{ 'Status'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Created'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in subscriptions %}
+                        {% set subscription = item.entity %}
+                        <tr>
+                            <td>{{ subscription.id }}</td>
+                            <td>#{{ subscription.orderId }}</td>
+                            <td>#{{ subscription.customerId }}</td>
+                            <td>{{ item.plan ? item.plan.name : '' }}</td>
+                            <td>{{ subscription.status }}</td>
+                            <td>{{ subscription.createdAt|date('Y-m-d H:i') }}</td>
+                            <td class="text-right"><a class="btn btn-outline-secondary btn-sm" href="{{ path('alliance.admin.subscription.subscription', {id: subscription.id}) }}">{{ 'Open'|trans({}, 'ModulesAlliancePayAdmin') }}</a></td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="7" class="text-muted">{{ 'No subscriptions yet.'|trans({}, 'ModulesAlliancePayAdmin') }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

@@ -67,14 +67,6 @@ services:
       - '@alliance.config'
       - '@translator'
 
-  AlliancePay\Controller\Admin\Authorization\AlliancePayAuthorizeByVirtualDeviceController:
-    class: AlliancePay\Controller\Admin\Authorization\AlliancePayAuthorizeByVirtualDeviceController
-    public: true
-    arguments:
-      $authService: '@alliance.auth.service'
-      $logger: '@alliance.logger'
-      $translator: '@translator'
-
   AlliancePay\Controller\Admin\Order\TransactionInfoController:
     class: AlliancePay\Controller\Admin\Order\TransactionInfoController
     public: true
@@ -93,7 +85,35 @@ services:
     arguments:
       $httpFactory: '@AlliancePay\Service\Gateway\Factory\HttpClientFactory'
       $config: '@alliance.config'
-      $jweEncryptionService: '@alliance.encryption.service'
+      $jwsSigner: '@alliance.jws.signer'
+      $jwsVerifier: '@alliance.jws.verifier'
+      $allianceLogger: '@alliance.logger'
+
+  alliance.jws.signer:
+    class: AlliancePay\Service\Jws\JwsSigner
+    public: true
+
+  alliance.requestuuid.generator:
+    class: AlliancePay\Service\RequestIdentification\GenerateRequestIdentification
+    public: true
+    autowire: true
+
+  alliance.jws.bank.public.key.provider:
+    class: AlliancePay\Service\Jws\BankPublicKeyProvider
+    public: true
+    autowire: true
+    arguments:
+      $httpFactory: '@AlliancePay\Service\Gateway\Factory\HttpClientFactory'
+      $config: '@alliance.config'
+      $jwsSigner: '@alliance.jws.signer'
+      $allianceLogger: '@alliance.logger'
+
+  alliance.jws.verifier:
+    class: AlliancePay\Service\Jws\JwsVerifier
+    public: true
+    autowire: true
+    arguments:
+      $bankPublicKeyProvider: '@alliance.jws.bank.public.key.provider'
       $allianceLogger: '@alliance.logger'
 
   alliance.encryption.service.jwefactory:
@@ -118,16 +138,6 @@ services:
       $keyFactory: '@alliance.encryption.service.keyfactory'
       $keySetFactory: '@alliance.encryption.service.keysetfactory'
       $jweFactory: '@alliance.encryption.service.jwefactory'
-      $logger: '@alliance.logger'
-
-  alliance.auth.service:
-    class: AlliancePay\Service\Authorization\AuthorizationService
-    public: true
-    autowire: true
-    arguments:
-      $client: '@AlliancePay\Service\Gateway\HttpClient'
-      $config: '@alliance.config'
-      $jweEncryptionService: '@alliance.encryption.service'
       $logger: '@alliance.logger'
 
   alliance.payment.processor:
@@ -233,3 +243,24 @@ services:
       $urlProvider: '@alliance.url.provider'
       $dateTimeNormalizer: '@alliance.datetime.normalizer'
       $allianceLogger: '@alliance.logger'
+
+  # Subscriptions admin controllers (domain services are resolved through ServiceLocator, see AbstractSubscriptionAdminController)
+  AlliancePay\Controller\Admin\Subscription\TemplateController:
+    class: AlliancePay\Controller\Admin\Subscription\TemplateController
+    public: true
+    autowire: false
+
+  AlliancePay\Controller\Admin\Subscription\PlanController:
+    class: AlliancePay\Controller\Admin\Subscription\PlanController
+    public: true
+    autowire: false
+
+  AlliancePay\Controller\Admin\Subscription\SubscriptionController:
+    class: AlliancePay\Controller\Admin\Subscription\SubscriptionController
+    public: true
+    autowire: false
+
+  AlliancePay\Controller\Admin\Subscription\AuditController:
+    class: AlliancePay\Controller\Admin\Subscription\AuditController
+    public: true
+    autowire: false

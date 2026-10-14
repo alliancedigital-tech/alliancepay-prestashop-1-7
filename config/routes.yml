@@ -14,16 +14,155 @@ alliance.save.config:
     _legacy_controller: 'AlliancePaySaveSettingsController'
     _legacy_link: 'AlliancePaySaveSettingsController'
 
-alliance.authorize.by.virtual.device:
-  path: /alliancepay/admin/authorize
-  methods: [ POST ]
-  defaults:
-    _controller: 'AlliancePay\Controller\Admin\Authorization\AlliancePayAuthorizeByVirtualDeviceController::authorizeAction'
-    _legacy_controller: 'AlliancePayAuthorizeByVirtualDeviceController'
-    _legacy_link: 'AlliancePayAuthorizeByVirtualDeviceController'
-
 alliance.order.sync:
   path: /alliancepay/admin/order/{orderId}/sync
   methods: [ GET ]
   defaults:
     _controller: 'AlliancePay\Controller\Admin\Order\TransactionInfoController::syncAction'
+
+# Subscriptions: plan templates
+alliance.admin.subscription.templates:
+  path: /alliancepay/admin/subscription/templates
+  methods: [ GET ]
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\TemplateController::indexAction'
+    _legacy_controller: 'AlliancePayTemplates'
+    _legacy_link: 'AlliancePayTemplates'
+
+alliance.admin.subscription.template_new:
+  path: /alliancepay/admin/subscription/templates/new
+  methods: [ GET, POST ]
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\TemplateController::formAction'
+    _legacy_controller: 'AlliancePayTemplates'
+
+alliance.admin.subscription.template_edit:
+  path: /alliancepay/admin/subscription/templates/{id}/edit
+  methods: [ GET, POST ]
+  requirements:
+    id: '\d+'
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\TemplateController::formAction'
+    _legacy_controller: 'AlliancePayTemplates'
+
+alliance.admin.subscription.template_archive:
+  path: /alliancepay/admin/subscription/templates/{id}/archive
+  methods: [ POST ]
+  requirements:
+    id: '\d+'
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\TemplateController::archiveAction'
+    _legacy_controller: 'AlliancePayTemplates'
+
+# Subscriptions: plans
+alliance.admin.subscription.plans:
+  path: /alliancepay/admin/subscription/plans
+  methods: [ GET ]
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\PlanController::indexAction'
+    _legacy_controller: 'AlliancePayPlans'
+    _legacy_link: 'AlliancePayPlans'
+
+alliance.admin.subscription.plan_new:
+  path: /alliancepay/admin/subscription/plans/new
+  methods: [ GET, POST ]
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\PlanController::newAction'
+    _legacy_controller: 'AlliancePayPlans'
+
+alliance.admin.subscription.product_search:
+  path: /alliancepay/admin/subscription/plans/product-search
+  methods: [ GET ]
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\PlanController::productSearchAction'
+    _legacy_controller: 'AlliancePayPlans'
+
+alliance.admin.subscription.plan:
+  path: /alliancepay/admin/subscription/plans/{id}
+  methods: [ GET ]
+  requirements:
+    id: '\d+'
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\PlanController::showAction'
+    _legacy_controller: 'AlliancePayPlans'
+
+alliance.admin.subscription.plan_retry_sync:
+  path: /alliancepay/admin/subscription/plans/{id}/retry-sync
+  methods: [ POST ]
+  requirements:
+    id: '\d+'
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\PlanController::retrySyncAction'
+    _legacy_controller: 'AlliancePayPlans'
+
+alliance.admin.subscription.plan_toggle_offered:
+  path: /alliancepay/admin/subscription/plans/{id}/toggle-offered
+  methods: [ POST ]
+  requirements:
+    id: '\d+'
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\PlanController::toggleOfferedAction'
+    _legacy_controller: 'AlliancePayPlans'
+
+alliance.admin.subscription.plan_reprice:
+  path: /alliancepay/admin/subscription/plans/{id}/reprice
+  methods: [ POST ]
+  requirements:
+    id: '\d+'
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\PlanController::repriceAction'
+    _legacy_controller: 'AlliancePayPlans'
+
+alliance.admin.subscription.plan_archive:
+  path: /alliancepay/admin/subscription/plans/{id}/archive
+  methods: [ POST ]
+  requirements:
+    id: '\d+'
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\PlanController::archiveAction'
+    _legacy_controller: 'AlliancePayPlans'
+
+# Subscriptions: customer subscriptions
+alliance.admin.subscription.subscriptions:
+  path: /alliancepay/admin/subscription/subscriptions
+  methods: [ GET ]
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\SubscriptionController::indexAction'
+    _legacy_controller: 'AlliancePaySubscriptions'
+    _legacy_link: 'AlliancePaySubscriptions'
+
+alliance.admin.subscription.subscription:
+  path: /alliancepay/admin/subscription/subscriptions/{id}
+  methods: [ GET ]
+  requirements:
+    id: '\d+'
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\SubscriptionController::showAction'
+    _legacy_controller: 'AlliancePaySubscriptions'
+
+alliance.admin.subscription.subscription_cancel:
+  path: /alliancepay/admin/subscription/subscriptions/{id}/cancel
+  methods: [ POST ]
+  requirements:
+    id: '\d+'
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\SubscriptionController::cancelAction'
+    _legacy_controller: 'AlliancePaySubscriptions'
+
+alliance.admin.subscription.payment_run_now:
+  path: /alliancepay/admin/subscription/payments/{paymentId}/run-now
+  methods: [ POST ]
+  requirements:
+    paymentId: '\d+'
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\SubscriptionController::runNowAction'
+    _legacy_controller: 'AlliancePaySubscriptions'
+
+# Subscriptions: audit log
+alliance.admin.subscription.audit:
+  path: /alliancepay/admin/subscription/audit
+  methods: [ GET ]
+  defaults:
+    _controller: 'AlliancePay\Controller\Admin\Subscription\AuditController::indexAction'
+    _legacy_controller: 'AlliancePaySubscriptionAudit'
+    _legacy_link: 'AlliancePaySubscriptionAudit'

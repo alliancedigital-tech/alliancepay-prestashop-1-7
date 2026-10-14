@@ -40,16 +40,10 @@ class Config
     public const PAYMENT_STATUS_PAGE_TYPE_CONFIG_NAME = 'ALLIANCE_PAY_STATUS_PAGE_TYPE';
     public const PAYMENT_HPP_PAY_TYPE = 'ALLIANCE_HPP_PAY_TYPE';
     public const PAYMENT_API_URL_CONFIG_NAME = 'ALLIANCE_PAY_API_URL';
-    public const PAYMENT_SERVICE_CODE_CONFIG_NAME = 'ALLIANCE_PAY_SERVICE_CODE';
     public const PAYMENT_MERCHANT_ID_CONFIG_NAME = 'ALLIANCE_PAY_MERCHANT_ID';
     public const PAYMENT_AUTHORIZATION_KEY_CONFIG_NAME = 'ALLIANCE_PAY_AUTHORIZATION_KEY';
-    public const PAYMENT_DEVICE_ID_CONFIG_NAME = 'ALLIANCE_PAY_DEVICE_ID';
-    public const PAYMENT_REFRESH_TOKEN_CONFIG_NAME = 'ALLIANCE_PAY_REFRESH_TOKEN';
-    public const PAYMENT_AUTH_TOKEN_CONFIG_NAME = 'ALLIANCE_PAY_AUTH_TOKEN';
-    public const PAYMENT_SERVER_PUBLIC_KEY_CONFIG_NAME = 'ALLIANCE_PAY_SERVER_PUBLIC_KEY';
-    public const PAYMENT_TOKEN_EXPIRATION_DATE_TIME_CONFIG_NAME = 'ALLIANCE_PAY_TOKEN_EXPIRATION_DATE_TIME';
-    public const PAYMENT_TOKEN_EXPIRATION_CONFIG_NAME = 'ALLIANCE_PAY_TOKEN_EXPIRATION';
-    public const PAYMENT_SESSION_EXPIRATION_CONFIG_NAME = 'ALLIANCE_PAY_SESSION_EXPIRATION';
+    public const PAYMENT_JWS_PRIVATE_KEY_CONFIG_NAME = 'ALLIANCE_PAY_JWS_PRIVATE_KEY';
+    public const PAYMENT_JWS_KEY_ID_CONFIG_NAME = 'ALLIANCE_PAY_JWS_KEY_ID';
     public const PAYMENT_SUCCESS_ORDER_STATE_CONFIG_NAME = 'ALLIANCE_PAY_SUCCESS_ORDER';
     public const PAYMENT_FAIL_ORDER_STATE_CONFIG_NAME = 'ALLIANCE_PAY_FAIL_ORDER';
     public const PAYMENT_SUCCESS_REFUND_ORDER_STATE_CONFIG_NAME = 'ALLIANCE_PAY_SUCCESS_REFUND_ORDER_STATE';
@@ -57,6 +51,7 @@ class Config
     public const PAYMENT_PREAUTH_EXP_DATE_CONFIG_NAME = 'ALLIANCE_PAY_PREAUTH_EXP_DATE';
     public const PAYMENT_PREAUTH_ORDER_STATE_CONFIG_NAME = 'ALLIANCE_PAY_PREAUTH_ORDER_STATE';
     public const PAYMENT_COMPLETION_ORDER_STATE_CONFIG_NAME = 'ALLIANCE_PAY_COMPLETION_ORDER_STATE';
+    public const SUBSCRIPTIONS_ENABLED_CONFIG_NAME = 'ALLIANCE_PAY_SUBSCRIPTIONS_ENABLED';
 
     public const PAYMENT_ALL_CONFIG_NAMES = [
         self::PAYMENT_ENABLED_CONFIG_NAME,
@@ -64,11 +59,10 @@ class Config
         self::PAYMENT_STATUS_PAGE_TYPE_CONFIG_NAME,
         self::PAYMENT_HPP_PAY_TYPE,
         self::PAYMENT_API_URL_CONFIG_NAME,
-        self::PAYMENT_SERVICE_CODE_CONFIG_NAME,
         self::PAYMENT_MERCHANT_ID_CONFIG_NAME,
         self::PAYMENT_AUTHORIZATION_KEY_CONFIG_NAME,
-        self::PAYMENT_DEVICE_ID_CONFIG_NAME,
-        self::PAYMENT_REFRESH_TOKEN_CONFIG_NAME,
+        self::PAYMENT_JWS_PRIVATE_KEY_CONFIG_NAME,
+        self::PAYMENT_JWS_KEY_ID_CONFIG_NAME,
         self::PAYMENT_SUCCESS_ORDER_STATE_CONFIG_NAME,
         self::PAYMENT_FAIL_ORDER_STATE_CONFIG_NAME,
         self::PAYMENT_SUCCESS_REFUND_ORDER_STATE_CONFIG_NAME,
@@ -76,24 +70,13 @@ class Config
         self::PAYMENT_PREAUTH_EXP_DATE_CONFIG_NAME,
         self::PAYMENT_PREAUTH_ORDER_STATE_CONFIG_NAME,
         self::PAYMENT_COMPLETION_ORDER_STATE_CONFIG_NAME,
+        self::SUBSCRIPTIONS_ENABLED_CONFIG_NAME,
     ];
 
-    public const SENSITIVE_DATA_FIELD_REFRESH_TOKEN = 'refreshToken';
-    public const SENSITIVE_DATA_FIELD_AUTH_TOKEN = 'authToken';
-    public const SENSITIVE_DATA_FIELD_DEVICE_ID = 'deviceId';
-    public const SENSITIVE_DATA_FIELD_SERVER_PUBLIC = 'serverPublic';
-    public const SENSITIVE_DATA_FIELD_TOKEN_EXPIRATION_DATE_TIME = 'tokenExpirationDateTime';
-    public const SENSITIVE_DATA_FIELD_TOKEN_EXPIRATION = 'tokenExpiration';
-    public const SENSITIVE_DATA_FIELD_SESSION_EXPIRATION = 'sessionExpiration';
-    public const SENSITIVE_DATA_FIELDS = [
-        self::SENSITIVE_DATA_FIELD_REFRESH_TOKEN,
-        self::SENSITIVE_DATA_FIELD_AUTH_TOKEN,
-        self::SENSITIVE_DATA_FIELD_DEVICE_ID,
-        self::SENSITIVE_DATA_FIELD_SERVER_PUBLIC,
-        self::SENSITIVE_DATA_FIELD_TOKEN_EXPIRATION_DATE_TIME,
-        self::SENSITIVE_DATA_FIELD_TOKEN_EXPIRATION,
-        self::SENSITIVE_DATA_FIELD_SESSION_EXPIRATION,
-    ];
+    public const CACHE_KEY_BANK_PUBLIC_KEY_PREFIX = 'ALLIANCE_PAY_BANK_PUBKEY_';
+
+    public const BANK_PUBLIC_KEY_CACHE_TTL = 3600;
+
     public const PAYMENT_HOOKS = [
         'paymentOptions',
         'paymentReturn'
@@ -225,18 +208,14 @@ class Config
                 $this->config->get(self::PAYMENT_HPP_PAY_TYPE),
             self::PAYMENT_API_URL_CONFIG_NAME =>
                 $this->config->get(self::PAYMENT_API_URL_CONFIG_NAME),
-            self::PAYMENT_SERVICE_CODE_CONFIG_NAME =>
-                $this->config->get(self::PAYMENT_SERVICE_CODE_CONFIG_NAME),
             self::PAYMENT_MERCHANT_ID_CONFIG_NAME =>
                 $this->config->get(self::PAYMENT_MERCHANT_ID_CONFIG_NAME),
             self::PAYMENT_AUTHORIZATION_KEY_CONFIG_NAME =>
                 $this->config->get(self::PAYMENT_AUTHORIZATION_KEY_CONFIG_NAME),
-            self::PAYMENT_DEVICE_ID_CONFIG_NAME =>
-                $this->config->get(self::PAYMENT_DEVICE_ID_CONFIG_NAME),
-            self::PAYMENT_REFRESH_TOKEN_CONFIG_NAME =>
-                $this->config->get(self::PAYMENT_REFRESH_TOKEN_CONFIG_NAME),
-            self::PAYMENT_AUTH_TOKEN_CONFIG_NAME =>
-                $this->config->get(self::PAYMENT_AUTH_TOKEN_CONFIG_NAME),
+            self::PAYMENT_JWS_PRIVATE_KEY_CONFIG_NAME =>
+                $this->config->get(self::PAYMENT_JWS_PRIVATE_KEY_CONFIG_NAME),
+            self::PAYMENT_JWS_KEY_ID_CONFIG_NAME =>
+                $this->config->get(self::PAYMENT_JWS_KEY_ID_CONFIG_NAME),
             self::PAYMENT_SUCCESS_ORDER_STATE_CONFIG_NAME =>
                 $this->config->get(self::PAYMENT_SUCCESS_ORDER_STATE_CONFIG_NAME),
             self::PAYMENT_FAIL_ORDER_STATE_CONFIG_NAME =>
@@ -251,6 +230,8 @@ class Config
                 $this->config->get(self::PAYMENT_PREAUTH_ORDER_STATE_CONFIG_NAME),
             self::PAYMENT_COMPLETION_ORDER_STATE_CONFIG_NAME =>
                 $this->config->get(self::PAYMENT_COMPLETION_ORDER_STATE_CONFIG_NAME),
+            self::SUBSCRIPTIONS_ENABLED_CONFIG_NAME =>
+                $this->config->get(self::SUBSCRIPTIONS_ENABLED_CONFIG_NAME),
         ];
     }
 
@@ -325,30 +306,6 @@ class Config
     /**
      * @return string
      */
-    public function getDeviceId(): string
-    {
-        return $this->config->get(self::PAYMENT_DEVICE_ID_CONFIG_NAME) ?? '';
-    }
-
-    /**
-     * @return string
-     */
-    public function getRefreshToken(): string
-    {
-        return $this->config->get(self::PAYMENT_REFRESH_TOKEN_CONFIG_NAME) ?? '';
-    }
-
-    /**
-     * @return string
-     */
-    public function getServiceCode(): string
-    {
-        return $this->config->get(self::PAYMENT_SERVICE_CODE_CONFIG_NAME) ?? '';
-    }
-
-    /**
-     * @return string
-     */
     public function getAuthorizationKey(): string
     {
         return $this->config->get(self::PAYMENT_AUTHORIZATION_KEY_CONFIG_NAME) ?? '';
@@ -357,9 +314,17 @@ class Config
     /**
      * @return string
      */
-    public function getServerPublicKey(): string
+    public function getJwsPrivateKey(): string
     {
-        return $this->config->get(self::PAYMENT_SERVER_PUBLIC_KEY_CONFIG_NAME) ?? '';
+        return $this->config->get(self::PAYMENT_JWS_PRIVATE_KEY_CONFIG_NAME) ?? '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getJwsKeyId(): string
+    {
+        return $this->config->get(self::PAYMENT_JWS_KEY_ID_CONFIG_NAME) ?? '';
     }
 
     /**
@@ -435,50 +400,53 @@ class Config
     }
 
     /**
-     * @param array $authData
+     * @return bool
+     */
+    public function isSubscriptionsEnabled(): bool
+    {
+        return (bool) $this->config->get(self::SUBSCRIPTIONS_ENABLED_CONFIG_NAME);
+    }
+
+    /**
+     * @param string $kid
+     * @return array|null
+     */
+    public function getCachedBankPublicKey(string $kid): ?array
+    {
+        $raw = $this->config->get(self::CACHE_KEY_BANK_PUBLIC_KEY_PREFIX . md5($kid));
+
+        if (empty($raw)) {
+            return null;
+        }
+
+        $cached = json_decode($raw, true);
+
+        if (!is_array($cached) || empty($cached['jwk']) || empty($cached['expires_at'])) {
+            return null;
+        }
+
+        if ($cached['expires_at'] < time()) {
+            return null;
+        }
+
+        return $cached['jwk'];
+    }
+
+    /**
+     * @param string $kid
+     * @param array $jwk
+     * @param int $ttl
      * @return void
      * @throws Exception
      */
-    public function saveAuthentificationData(array $authData): void
+    public function setCachedBankPublicKey(string $kid, array $jwk, int $ttl = self::BANK_PUBLIC_KEY_CACHE_TTL): void
     {
-        if (!$this->hasAllRequiredFields($authData)) {
-            return;
-        }
+        $payload = json_encode([
+            'jwk' => $jwk,
+            'expires_at' => time() + $ttl,
+        ]);
 
-        $serverPublic = json_encode($authData[self::SENSITIVE_DATA_FIELD_SERVER_PUBLIC]);
-
-        try {
-            $this->config->set(
-                self::PAYMENT_REFRESH_TOKEN_CONFIG_NAME,
-                $authData[self::SENSITIVE_DATA_FIELD_REFRESH_TOKEN]
-            );
-            $this->config->set(
-                self::PAYMENT_AUTH_TOKEN_CONFIG_NAME,
-                $authData[self::SENSITIVE_DATA_FIELD_AUTH_TOKEN]
-            );
-            $this->config->set(
-                self::PAYMENT_DEVICE_ID_CONFIG_NAME,
-                $authData[self::SENSITIVE_DATA_FIELD_DEVICE_ID]
-            );
-            $this->config->set(
-                self::PAYMENT_SERVER_PUBLIC_KEY_CONFIG_NAME,
-                $serverPublic
-            );
-            $this->config->set(
-                self::PAYMENT_TOKEN_EXPIRATION_DATE_TIME_CONFIG_NAME,
-                $authData[self::SENSITIVE_DATA_FIELD_TOKEN_EXPIRATION_DATE_TIME]
-            );
-            $this->config->set(
-                self::PAYMENT_TOKEN_EXPIRATION_CONFIG_NAME,
-                $authData[self::SENSITIVE_DATA_FIELD_TOKEN_EXPIRATION]
-            );
-            $this->config->set(
-                self::PAYMENT_SESSION_EXPIRATION_CONFIG_NAME,
-                $authData[self::SENSITIVE_DATA_FIELD_SESSION_EXPIRATION]
-            );
-        } catch (Exception $exception) {
-            $this->logger->error($exception->getMessage());
-        }
+        $this->config->set(self::CACHE_KEY_BANK_PUBLIC_KEY_PREFIX . md5($kid), $payload);
     }
 
     /**
@@ -507,19 +475,4 @@ class Config
         return strtoupper(Currency::getIsoCodeById($defaultId));
     }
 
-    /**
-     * @param array $authData
-     * @return bool
-     * @throws Exception
-     */
-    private function hasAllRequiredFields(array $authData): bool
-    {
-        foreach (self::SENSITIVE_DATA_FIELDS as $key) {
-            if (empty($authData[$key])) {
-                throw new Exception('Alliance payment configuration key ' . $key . ' is missing.');
-            }
-        }
-
-        return true;
-    }
 }

@@ -42,6 +42,10 @@ class EntityHydrator
     public function hydrate(object $entity, array $data): object
     {
         foreach ($data as $property => $value) {
+            if ($value === null) {
+                continue;
+            }
+
             $method = $this->checkAndGetMethodName($entity, self::SETTER_PREFIX,$property);
             if (!empty($method)) {
                 if (in_array($property, self::DATETIME_PROPERTIES) && !empty($value)) {

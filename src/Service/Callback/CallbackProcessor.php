@@ -68,6 +68,10 @@ class CallbackProcessor
             return;
         }
 
+        if ($order === null) {
+            return;
+        }
+
         $operationType = $callbackData['operation']['type'] ?? null;
 
         if ($operationType === Config::OPERATION_TYPE_PREAUTH) {
@@ -117,13 +121,13 @@ class CallbackProcessor
     {
         $refundAmount = 0;
 
-        foreach ($callbackData['operations'] as $operation) {
-            if ($operation['type'] == 'REFUND' && $operation['status'] == Config::REFUND_STATUS_SUCCESS) {
+        foreach ($callbackData['operations'] ?? [] as $operation) {
+            if (($operation['type'] ?? null) == 'REFUND' && ($operation['status'] ?? null) == Config::REFUND_STATUS_SUCCESS) {
                 $refundAmount += $operation['coinAmount'];
             }
         }
 
-        return $coinAmount === $refundAmount;
+        return $refundAmount > 0 && $coinAmount === $refundAmount;
     }
 
     private function syncOrderPayment(AllianceOrder $allianceOrder, ?int $newCoinAmount = null): void

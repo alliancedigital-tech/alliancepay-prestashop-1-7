@@ -25,5 +25,8 @@
         "audit": {
             "ignore": ["PKSA-njxg-bvx9-65t2"]
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
     }
 }

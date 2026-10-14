@@ -54,15 +54,6 @@ class AlliancePaySaveSettingsController extends FrameworkBundleAdminController
         $this->translator = $translator;
     }
 
-    /*public function __construct()
-    {
-        parent::__construct();
-        $container = SymfonyContainer::getInstance();
-        $this->twig = $container->get('twig');
-        $this->router = $container->get('router');
-        $this->config = $container->get('alliance.config');
-    }*/
-
     /**
      * @param Request $request
      * @return Response
@@ -73,7 +64,7 @@ class AlliancePaySaveSettingsController extends FrameworkBundleAdminController
         $parameters = $request->request->all();
 
         foreach (Config::PAYMENT_ALL_CONFIG_NAMES as $parameterName) {
-            if (!empty($parameters[$parameterName])) {
+            if (isset($parameters[$parameterName]) && $parameters[$parameterName] !== '') {
                 $this->config->saveConfig(
                     $parameterName,
                     $parameters[$parameterName]

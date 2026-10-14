@@ -1,0 +1,126 @@
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-header-title">{{ 'New subscription plan'|trans({}, 'ModulesAlliancePayAdmin') }}</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ path('alliance.admin.subscription.plan_new') }}" id="alliance-plan-form">
+                <div class="form-group">
+                    <label>{{ 'Product'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <input type="text" class="form-control" id="alliance-product-search" autocomplete="off"
+                           placeholder="{{ 'Type at least 2 characters of the product name'|trans({}, 'ModulesAlliancePayAdmin') }}"
+                           value="{{ data.productLabel }}">
+                    <div class="list-group" id="alliance-product-results" style="max-width: 600px;"></div>
+                    <input type="hidden" name="product_id" id="alliance-product-id" value="{{ data.productId }}">
+                    <input type="hidden" name="product_label" id="alliance-product-label" value="{{ data.productLabel }}">
+                    <small class="form-text text-muted">{{ 'The catalog price of the selected product prefills the amounts (you can edit them).'|trans({}, 'ModulesAlliancePayAdmin') }}</small>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Template'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <select class="form-control" name="template_id" id="alliance-template-select">
+                        <option value="">{{ '- none, enter rules manually -'|trans({}, 'ModulesAlliancePayAdmin') }}</option>
+                        {% for template in templates %}
+                            <option value="{{ template.id }}" {{ data.templateId == template.id ? 'selected' }}
+                                    data-category="{{ template.category }}" data-rows="{{ template.rows|json_encode|e('html_attr') }}">{{ template.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Plan name'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <input type="text" class="form-control" name="name" value="{{ data.name }}" required>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Description'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <textarea class="form-control" name="description" rows="2">{{ data.description }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Category indicator'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <input type="text" class="form-control" name="category_indicator" id="alliance-category" value="{{ data.categoryIndicator }}" required>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Applies from (optional)'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <input type="datetime-local" class="form-control" name="applies_from" value="{{ data.appliesFrom }}">
+                </div>
+
+                <h4>{{ 'Rules'|trans({}, 'ModulesAlliancePayAdmin') }} ({{ currency_iso }})</h4>
+                {% include '@Modules/alliancepay/views/templates/admin/subscription/_rules_editor.html.twig' with {
+                    rules: data.rules, table_id: 'alliance-plan-rules', currency_code: currency_code, interval_units: interval_units
+                } %}
+
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">{{ 'Create plan'|trans({}, 'ModulesAlliancePayAdmin') }}</button>
+                    <a class="btn btn-outline-secondary" href="{{ path('alliance.admin.subscription.plans') }}">{{ 'Back'|trans({}, 'ModulesAlliancePayAdmin') }}</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var searchUrl = {{ product_search_url|json_encode|raw }};
+            var search = document.getElementById('alliance-product-search');
+            var results = document.getElementById('alliance-product-results');
+            var productId = document.getElementById('alliance-product-id');
+            var productLabel = document.getElementById('alliance-product-label');
+            var templateSelect = document.getElementById('alliance-template-select');
+            var category = document.getElementById('alliance-category');
+            var price = null;
+            var timer = null;
+
+            function applyTemplate() {
+                var option = templateSelect.options[templateSelect.selectedIndex];
+                if (!option || !option.dataset.rows) { return; }
+                var rows = JSON.parse(option.dataset.rows);
+                window.AlliancePayRules.clear('alliance-plan-rules');
+                rows.forEach(function (row) {
+                    var amount = row.type === 'TRIAL' ? '0.00' : (price !== null ? price : '');
+                    window.AlliancePayRules.addRow('alliance-plan-rules', {
+                        paymentNumberFrom: row.paymentNumberFrom, paymentNumberTo: row.paymentNumberTo,
+                        intervalValue: row.intervalValue, intervalUnit: row.intervalUnit, amount: amount
+                    });
+                });
+                if (option.dataset.category && !category.value) { category.value = option.dataset.category; }
+            }
+
+            function applyPriceToPaidRows() {
+                if (price === null) { return; }
+                document.querySelectorAll('#alliance-plan-rules tbody tr').forEach(function (tr) {
+                    var input = tr.querySelector('input[name$="[coinAmount]"]');
+                    if (input && (input.value === '' || parseFloat(input.value) > 0)) { input.value = price; }
+                });
+            }
+
+            templateSelect.addEventListener('change', applyTemplate);
+
+            search.addEventListener('input', function () {
+                clearTimeout(timer);
+                var query = search.value.trim();
+                if (query.length < 2) { results.innerHTML = ''; return; }
+                timer = setTimeout(function () {
+                    fetch(searchUrl + (searchUrl.indexOf('?') === -1 ? '?' : '&') + 'q=' + encodeURIComponent(query), {credentials: 'same-origin'})
+                        .then(function (response) { return response.json(); })
+                        .then(function (items) {
+                            results.innerHTML = '';
+                            items.forEach(function (item) {
+                                var a = document.createElement('a');
+                                a.href = '#';
+                                a.className = 'list-group-item list-group-item-action';
+                                a.textContent = '#' + item.id + ' ' + item.name + ' (' + item.price + ')';
+                                a.addEventListener('click', function (event) {
+                                    event.preventDefault();
+                                    productId.value = item.id;
+                                    productLabel.value = '#' + item.id + ' ' + item.name;
+                                    search.value = productLabel.value;
+                                    price = item.price;
+                                    results.innerHTML = '';
+                                    applyPriceToPaidRows();
+                                });
+                                results.appendChild(a);
+                            });
+                        });
+                }, 250);
+            });
+        })();
+    </script>
+{% endblock %}

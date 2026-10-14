@@ -1,0 +1,94 @@
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header"><h3 class="card-header-title">{{ 'Subscription'|trans({}, 'ModulesAlliancePayAdmin') }} #{{ subscription.id }}</h3></div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">{{ 'Status'|trans({}, 'ModulesAlliancePayAdmin') }}</dt><dd class="col-sm-9">{{ subscription.status }}</dd>
+                <dt class="col-sm-3">{{ 'Order'|trans({}, 'ModulesAlliancePayAdmin') }}</dt><dd class="col-sm-9">#{{ subscription.orderId }}</dd>
+                <dt class="col-sm-3">{{ 'Customer'|trans({}, 'ModulesAlliancePayAdmin') }}</dt><dd class="col-sm-9">#{{ subscription.customerId }}</dd>
+                <dt class="col-sm-3">{{ 'Plan'|trans({}, 'ModulesAlliancePayAdmin') }}</dt>
+                <dd class="col-sm-9">{% if plan %}<a href="{{ path('alliance.admin.subscription.plan', {id: plan.id}) }}">{{ plan.name }}</a>{% endif %}</dd>
+                <dt class="col-sm-3">{{ 'Provider order'|trans({}, 'ModulesAlliancePayAdmin') }}</dt><dd class="col-sm-9"><code>{{ subscription.providerOrderId }}</code></dd>
+                <dt class="col-sm-3">{{ 'Rules at signup'|trans({}, 'ModulesAlliancePayAdmin') }}</dt>
+                <dd class="col-sm-9">
+                    {% for rule in subscription.rulesSnapshot %}
+                        {{ rule.paymentNumberFrom }}&ndash;{{ rule.paymentNumberTo }}: {{ (rule.coinAmount / 100)|number_format(2, '.', ' ') }}, {{ rule.intervalValue }} {{ rule.intervalUnit }}<br>
+                    {% endfor %}
+                </dd>
+            </dl>
+            {% if subscription.status == 'ACTIVE' %}
+                {% if has_elevated_rights %}
+                    <form method="post" action="{{ path('alliance.admin.subscription.subscription_cancel', {id: subscription.id}) }}"
+                          onsubmit="return confirm('{{ 'Cancel this subscription at the provider?'|trans({}, 'ModulesAlliancePayAdmin')|e('js') }}');">
+                        <button class="btn btn-danger" type="submit">{{ 'Cancel subscription'|trans({}, 'ModulesAlliancePayAdmin') }}</button>
+                    </form>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h3 class="card-header-title">{{ 'Scheduled payments'|trans({}, 'ModulesAlliancePayAdmin') }}</h3></div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th><th>{{ 'Scheduled'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th>{{ 'Status'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Amount'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th>{{ 'Operation'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Retries'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th>{{ 'Review'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                        <tr>
+                            <td>{{ payment.paymentNumber }}</td>
+                            <td>{{ payment.scheduledDate ? payment.scheduledDate|date('Y-m-d') : '' }}</td>
+                            <td>{{ payment.status }}</td>
+                            <td>{{ payment.coinAmount is not null ? (payment.coinAmount / 100)|number_format(2, '.', ' ') : '' }}</td>
+                            <td><code>{{ payment.operationId }}</code></td>
+                            <td>{{ payment.retryCount }}</td>
+                            <td>{% if payment.reviewRequired %}<span class="badge badge-warning" title="{{ payment.reviewNote }}">{{ 'needs review'|trans({}, 'ModulesAlliancePayAdmin') }}</span>{% endif %}</td>
+                            <td class="text-right">
+                                {% if has_elevated_rights and payment.scheduledPaymentId and payment.status in ['WAITING', 'FAIL', 'RETRY'] %}
+                                    <form method="post" action="{{ path('alliance.admin.subscription.payment_run_now', {paymentId: payment.id}) }}"
+                                          onsubmit="return confirm('{{ 'Run this payment at the provider now?'|trans({}, 'ModulesAlliancePayAdmin')|e('js') }}');">
+                                        <button class="btn btn-outline-primary btn-sm" type="submit">{{ 'Run now'|trans({}, 'ModulesAlliancePayAdmin') }}</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="8" class="text-muted">{{ 'No scheduled payments recorded yet.'|trans({}, 'ModulesAlliancePayAdmin') }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h3 class="card-header-title">{{ 'Operations at the provider (live)'|trans({}, 'ModulesAlliancePayAdmin') }}</h3></div>
+        <div class="card-body">
+            {% if operations_warning %}
+                <div class="alert alert-warning">{{ 'Could not load operations from the provider:'|trans({}, 'ModulesAlliancePayAdmin') }} {{ operations_warning }}</div>
+            {% endif %}
+            <table class="table">
+                <thead><tr><th>{{ 'Operation'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th>{{ 'Type'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th>{{ 'Status'|trans({}, 'ModulesAlliancePayAdmin') }}</th><th>{{ 'Amount'|trans({}, 'ModulesAlliancePayAdmin') }}</th></tr></thead>
+                <tbody>
+                    {% for operation in operations %}
+                        <tr>
+                            <td><code>{{ operation.operationId|default('') }}</code></td>
+                            <td>{{ operation.type|default('') }}</td>
+                            <td>{{ operation.status|default('') }}</td>
+                            <td>{{ operation.coinAmount is defined and operation.coinAmount is not null ? (operation.coinAmount / 100)|number_format(2, '.', ' ') : '' }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="4" class="text-muted">{{ 'No operations.'|trans({}, 'ModulesAlliancePayAdmin') }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a class="btn btn-outline-secondary" href="{{ path('alliance.admin.subscription.subscriptions') }}">{{ 'Back'|trans({}, 'ModulesAlliancePayAdmin') }}</a>
+        </div>
+    </div>
+{% endblock %}

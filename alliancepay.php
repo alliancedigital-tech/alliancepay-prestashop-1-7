@@ -9,9 +9,11 @@ use AlliancePay\Config\Config;
 use AlliancePay\Model\Payment\Order\OrderInformation;
 use AlliancePay\Model\Payment\Refund\RefundProcessor;
 use AlliancePay\Service\Completion\CompletionProcessor;
+use AlliancePay\Service\Subscription\Checkout\CartSubscriptionService;
 use Doctrine\ORM\EntityManagerInterface;
 use PrestaShop\PrestaShop\Adapter\CoreException;
 use PrestaShop\PrestaShop\Adapter\ServiceLocator;
+use PrestaShop\PrestaShop\Core\Localization\Exception\LocalizationException;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 if (!defined('_PS_VERSION_')) {
@@ -20,6 +22,27 @@ if (!defined('_PS_VERSION_')) {
 
 class Alliancepay extends PaymentModule
 {
+    public const SUBSCRIPTION_HOOKS = [
+        'displayProductActions',
+        'actionFrontControllerInitAfter',
+        'actionCartUpdateQuantityBefore',
+        'actionObjectProductInCartDeleteAfter',
+        'displayCustomerAccount',
+        'actionFrontControllerSetMedia',
+    ];
+
+    /**
+     * Admin tabs of the subscription feature: class name (= _legacy_controller of the route) => [route, English name, Ukrainian name].
+     */
+    public const SUBSCRIPTION_TABS = [
+        'AlliancePayPlans' => ['alliance.admin.subscription.plans', 'Subscription plans', 'Плани підписок'],
+        'AlliancePayTemplates' => ['alliance.admin.subscription.templates', 'Plan templates', 'Шаблони планів'],
+        'AlliancePaySubscriptions' => ['alliance.admin.subscription.subscriptions', 'Subscriptions', 'Підписки'],
+        'AlliancePaySubscriptionAudit' => ['alliance.admin.subscription.audit', 'Subscription audit log', 'Журнал аудиту підписок'],
+    ];
+
+    public const SUBSCRIPTION_PARENT_TAB = 'AlliancePaySubscriptionsParent';
+
 
     private $currency;
 
@@ -37,7 +60,7 @@ class Alliancepay extends PaymentModule
     {
         $this->name = 'alliancepay';
         $this->tab = 'payments_gateways';
-        $this->version = '1.3.0';
+        $this->version = '1.4.0';
         $this->author = 'Alliance Dgtl.';
         $this->bootstrap = true;
         $this->active = true;
@@ -64,6 +87,7 @@ class Alliancepay extends PaymentModule
             'hookDisplayAdminOrderTop',
             'actionOrderStatusUpdate',
         ];
+        $hooks = array_merge($hooks, self::SUBSCRIPTION_HOOKS);
         foreach ($hooks as $hook) {
             if (!$this->registerHook($hook)) {
                 return false;
@@ -71,7 +95,9 @@ class Alliancepay extends PaymentModule
         }
 
         try {
-            $instalTablesResult = $this->createAllianceOrderTable() && $this->createAllianceRefundTable();
+            $instalTablesResult = $this->createAllianceOrderTable()
+                && $this->createAllianceRefundTable()
+                && $this->createSubscriptionTables();
         } catch(PrestaShopDatabaseException $e) {
             $message = 'Alliance create tables error: ' . $e->getMessage();
             PrestaShopLogger::addLog('AlliancePay: ' . $message, 3);
@@ -80,7 +106,8 @@ class Alliancepay extends PaymentModule
         }
 
         return Configuration::updateValue('ALLIANCE_PAYMENT_NAME', 'AlliancePay')
-            && $instalTablesResult;
+            && $instalTablesResult
+            && $this->installSubscriptionTabs();
     }
 
     /**
@@ -89,9 +116,344 @@ class Alliancepay extends PaymentModule
     public function uninstall()
     {
         return (
-            parent::uninstall()
+            $this->uninstallSubscriptionTabs()
+            && parent::uninstall()
             && Configuration::deleteByName('ALLIANCE_PAYMENT_NAME')
         );
+    }
+
+    /**
+     * Registers the subscription hooks (install and upgrade-1.4.0.php).
+     *
+     * @return bool
+     */
+    public function registerSubscriptionHooks()
+    {
+        foreach (self::SUBSCRIPTION_HOOKS as $hook) {
+            if (!$this->isRegisteredInHook($hook) && !$this->registerHook($hook)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Adds the "Subscriptions" admin menu (under Orders) with its pages. Idempotent.
+     *
+     * @return bool
+     */
+    public function installSubscriptionTabs()
+    {
+        $parentId = $this->ensureTab(
+            self::SUBSCRIPTION_PARENT_TAB,
+            (int) Tab::getIdFromClassName('AdminParentOrders'),
+            'Subscriptions',
+            'Підписки',
+            ''
+        );
+
+        if (!$parentId) {
+            return false;
+        }
+
+        foreach (self::SUBSCRIPTION_TABS as $className => $definition) {
+            if (!$this->ensureTab($className, $parentId, $definition[1], $definition[2], $definition[0])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function uninstallSubscriptionTabs()
+    {
+        $classNames = array_merge(array_keys(self::SUBSCRIPTION_TABS), [self::SUBSCRIPTION_PARENT_TAB]);
+
+        foreach ($classNames as $className) {
+            $tabId = (int) Tab::getIdFromClassName($className);
+
+            if ($tabId) {
+                $tab = new Tab($tabId);
+
+                if (!$tab->delete()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param string $className
+     * @param int $parentId
+     * @param string $nameEn
+     * @param string $nameUk
+     * @param string $routeName
+     * @return int tab id, 0 on failure
+     */
+    private function ensureTab($className, $parentId, $nameEn, $nameUk, $routeName)
+    {
+        $existingId = (int) Tab::getIdFromClassName($className);
+
+        if ($existingId) {
+            return $existingId;
+        }
+
+        $tab = new Tab();
+        $tab->active = 1;
+        $tab->class_name = $className;
+        $tab->route_name = $routeName;
+        $tab->module = $this->name;
+        $tab->id_parent = (int) $parentId;
+        $tab->name = [];
+
+        foreach (Language::getLanguages(false) as $language) {
+            $tab->name[$language['id_lang']] = $language['iso_code'] === 'uk' ? $nameUk : $nameEn;
+        }
+
+        return $tab->add() ? (int) $tab->id : 0;
+    }
+
+    /**
+     * Subscription choice on the product page (rendered inside the add-to-cart form).
+     *
+     * @param array $params
+     * @return string
+     */
+    public function hookDisplayProductActions($params)
+    {
+        try {
+            $service = ServiceLocator::get(CartSubscriptionService::class);
+            $em = $this->getService('doctrine.orm.entity_manager');
+            $product = $params['product'];
+            $productId = (int) (is_array($product) || $product instanceof ArrayAccess ? $product['id_product'] : $product->id);
+            $currency = $this->context->currency;
+            $plans = $service->getOfferedPlans($em, $productId, $currency ? $currency->iso_code : null);
+        } catch (Throwable $exception) {
+            PrestaShopLogger::addLog('AlliancePay: subscription options failed: ' . $exception->getMessage(), 3);
+
+            return '';
+        }
+
+        if (empty($plans)) {
+            return '';
+        }
+
+        $plansView = [];
+
+        foreach ($plans as $plan) {
+            $plansView[] = [
+                'id' => $plan->getId(),
+                'name' => $plan->getName(),
+                'stages' => $this->presentRules($plan->getRules()),
+            ];
+        }
+
+        $customer = $this->context->customer;
+        $this->context->smarty->assign([
+            'alliance_plans' => $plansView,
+            'alliance_is_logged' => Validate::isLoadedObject($customer) && $customer->isLogged() && !$customer->isGuest(),
+            'alliance_login_url' => $this->context->link->getPageLink('authentication', true),
+            'alliance_field_type' => CartSubscriptionService::REQUEST_PURCHASE_TYPE,
+            'alliance_field_plan' => CartSubscriptionService::REQUEST_PLAN_ID,
+        ]);
+
+        return $this->fetch('module:alliancepay/views/templates/front/subscription/product_actions.tpl');
+    }
+
+    /**
+     * First line of the cart guard, for add-to-cart / cart-update requests: answers with the subscription
+     * error only, so the customer does not also get PrestaShop's generic "maximum quantity" message.
+     *
+     * @param array $params
+     * @return void
+     */
+    public function hookActionFrontControllerInitAfter($params)
+    {
+        $controller = $params['controller'];
+
+        if (!($controller instanceof CartController) || (!Tools::getIsset('add') && !Tools::getIsset('update'))) {
+            return;
+        }
+
+        try {
+            if (!ServiceLocator::get(Config::class)->isSubscriptionsEnabled()) {
+                return;
+            }
+
+            $service = ServiceLocator::get(CartSubscriptionService::class);
+            $customer = $this->context->customer;
+            $productId = (int) Tools::getValue('id_product');
+            $attributeId = (int) Tools::getValue('id_product_attribute');
+
+            if (Tools::getIsset('group') && $productId) {
+                $attributeId = (int) Product::getIdProductAttributeByIdAttributes($productId, Tools::getValue('group'));
+            }
+
+            $errors = $service->guardCartChange(
+                $this->getService('doctrine.orm.entity_manager'),
+                $this->context->cart,
+                $productId,
+                $attributeId,
+                abs((int) Tools::getValue('qty', 1)),
+                (string) Tools::getValue('op', 'up'),
+                Validate::isLoadedObject($customer) && $customer->isLogged() && !$customer->isGuest(),
+                Tools::getValue(CartSubscriptionService::REQUEST_PURCHASE_TYPE) ?: null,
+                (int) Tools::getValue(CartSubscriptionService::REQUEST_PLAN_ID),
+                false
+            );
+        } catch (Throwable $exception) {
+            PrestaShopLogger::addLog('AlliancePay: cart pre-check failed: ' . $exception->getMessage(), 3);
+
+            return;
+        }
+
+        if (empty($errors)) {
+            return;
+        }
+
+        $messages = $service->translateErrors($errors);
+
+        if (Tools::getValue('ajax')) {
+            header('Content-Type: application/json');
+            die(json_encode(['hasError' => true, 'errors' => $messages]));
+        }
+
+        $this->context->cookie->alliance_error = implode(' ', $messages);
+        $this->context->cookie->write();
+        Tools::redirect($this->context->link->getPageLink('cart', true, null, ['action' => 'show']));
+    }
+
+    /**
+     * Server-side guard: no guest subscription, no mixed cart, no two subscriptions.
+     * A refused change is turned into a no-op (available_for_order=false) plus a visible error.
+     *
+     * @param array $params
+     * @return void
+     */
+    public function hookActionCartUpdateQuantityBefore($params)
+    {
+        try {
+            $config = ServiceLocator::get(Config::class);
+
+            if (!$config->isSubscriptionsEnabled()) {
+                return;
+            }
+
+            $service = ServiceLocator::get(CartSubscriptionService::class);
+            $em = $this->getService('doctrine.orm.entity_manager');
+            $customer = $this->context->customer;
+
+            $errors = $service->guardCartChange(
+                $em,
+                $params['cart'],
+                (int) $params['product']->id,
+                (int) $params['id_product_attribute'],
+                (int) $params['quantity'],
+                (string) $params['operator'],
+                Validate::isLoadedObject($customer) && $customer->isLogged() && !$customer->isGuest(),
+                Tools::getValue(CartSubscriptionService::REQUEST_PURCHASE_TYPE) ?: null,
+                (int) Tools::getValue(CartSubscriptionService::REQUEST_PLAN_ID)
+            );
+        } catch (Throwable $exception) {
+            PrestaShopLogger::addLog('AlliancePay: cart guard failed: ' . $exception->getMessage(), 3);
+
+            return;
+        }
+
+        if (empty($errors)) {
+            return;
+        }
+
+        if ($this->context->controller && property_exists($this->context->controller, 'errors')) {
+            foreach ($service->translateErrors($errors) as $message) {
+                $this->context->controller->errors[] = $message;
+            }
+        }
+
+        $params['product']->available_for_order = false;
+    }
+
+    /**
+     * @param array $params
+     * @return void
+     */
+    public function hookActionObjectProductInCartDeleteAfter($params)
+    {
+        try {
+            $service = ServiceLocator::get(CartSubscriptionService::class);
+            $service->removeIntent(
+                $this->getService('doctrine.orm.entity_manager'),
+                (int) $params['id_cart'],
+                (int) $params['id_product'],
+                (int) $params['id_product_attribute']
+            );
+        } catch (Throwable $exception) {
+            PrestaShopLogger::addLog('AlliancePay: cart intent cleanup failed: ' . $exception->getMessage(), 3);
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function hookDisplayCustomerAccount()
+    {
+        try {
+            if (!ServiceLocator::get(Config::class)->isSubscriptionsEnabled()) {
+                return '';
+            }
+        } catch (Throwable $exception) {
+            return '';
+        }
+
+        $this->context->smarty->assign([
+            'alliance_subscriptions_url' => $this->context->link->getModuleLink($this->name, 'subscriptions', [], true),
+        ]);
+
+        return $this->fetch('module:alliancepay/views/templates/front/subscription/account_link.tpl');
+    }
+
+    /**
+     * @return void
+     */
+    public function hookActionFrontControllerSetMedia()
+    {
+        if ($this->context->controller && $this->context->controller->php_self === 'product') {
+            $this->context->controller->registerJavascript(
+                'alliancepay-subscription',
+                'modules/' . $this->name . '/views/js/subscription.js',
+                ['position' => 'bottom', 'priority' => 150]
+            );
+        }
+    }
+
+    /**
+     * @param array $rules
+     * @return array
+     * @throws LocalizationException
+     */
+    private function presentRules(array $rules)
+    {
+        $stages = [];
+
+        foreach ($rules as $rule) {
+            $from = (int) $rule['paymentNumberFrom'];
+            $to = (int) $rule['paymentNumberTo'];
+            $stages[] = [
+                'payments' => $from === $to ? (string) $from : $from . '–' . $to,
+                'amount' => Tools::displayPrice(((int) $rule['coinAmount']) / 100),
+                'is_free' => (int) $rule['coinAmount'] === 0,
+                'interval' => (int) $rule['intervalValue'],
+                'unit' => strtolower((string) $rule['intervalUnit']),
+            ];
+        }
+
+        return $stages;
     }
 
     /**
@@ -329,6 +691,26 @@ class Alliancepay extends PaymentModule
      */
     public function isPaymentModule()
     {
+        return true;
+    }
+
+    /**
+     * Creates the subscription tables (also used by upgrade-1.4.0.php).
+     *
+     * @return bool
+     */
+    public function createSubscriptionTables()
+    {
+        if (!class_exists('\AlliancePay\Install\SubscriptionSchema')) {
+            require_once __DIR__ . '/src/Install/SubscriptionSchema.php';
+        }
+
+        foreach (\AlliancePay\Install\SubscriptionSchema::getCreateStatements(_DB_PREFIX_) as $sql) {
+            if (!Db::getInstance()->execute($sql)) {
+                return false;
+            }
+        }
+
         return true;
     }
 

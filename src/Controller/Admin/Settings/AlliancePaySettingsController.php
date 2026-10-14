@@ -61,7 +61,6 @@ class AlliancePaySettingsController extends FrameworkBundleAdminController
                 'preauth_exp_date_options' => $this->config->getPreAuthExpDateOptions(),
                 'shop_currency_iso' => $shopCurrencyIso,
                 'save_url' => $this->router->generate('alliance.save.config', [], true),
-                'auth_url' => $this->router->generate('alliance.authorize.by.virtual.device', [], true)
             ]
         );
     }

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="not-relevant" source-language="en" target-language="uk" datatype="plaintext">
+    <body>
+      <trans-unit id="1">
+        <source>A subscription can only be bought in a quantity of one.</source>
+        <target>Підписку можна оформити лише в кількості одна.</target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>A subscription cannot be combined with other products in one order.</source>
+        <target>Підписку не можна поєднувати з іншими товарами в одному замовленні.</target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>A subscription cannot be combined with other products. Complete or remove the subscription first.</source>
+        <target>Підписку не можна поєднувати з іншими товарами. Спочатку оформіть або видаліть підписку з кошика.</target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Active</source>
+        <target>Активна</target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Awaiting payment</source>
+        <target>Очікує оплати</target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Cancel subscription</source>
+        <target>Скасувати підписку</target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Cancel this subscription?</source>
+        <target>Скасувати цю підписку?</target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Canceled</source>
+        <target>Скасована</target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Completed</source>
+        <target>Завершена</target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Invalid request, please try again.</source>
+        <target>Некоректний запит, спробуйте ще раз.</target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>My subscriptions</source>
+        <target>Мої підписки</target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Next payment</source>
+        <target>Наступний платіж</target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>One-time purchase</source>
+        <target>Одноразова покупка</target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Only an active subscription can be canceled.</source>
+        <target>Скасувати можна лише активну підписку.</target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Only one subscription can be purchased at a time.</source>
+        <target>Одночасно можна оформити лише одну підписку.</target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Order</source>
+        <target>Замовлення</target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Payment</source>
+        <target>Платіж</target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Payment failed</source>
+        <target>Оплату не виконано</target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Plan</source>
+        <target>План</target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Please sign in to subscribe. Guest checkout is not available for subscriptions.</source>
+        <target>Увійдіть в обліковий запис, щоб оформити підписку. Для підписок гостьове оформлення недоступне.</target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Sign in to subscribe</source>
+        <target>Увійдіть, щоб підписатися</target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Status</source>
+        <target>Статус</target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Subscribe</source>
+        <target>Підписатися</target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Subscription not found.</source>
+        <target>Підписку не знайдено.</target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>The provider could not cancel the subscription: %error%</source>
+        <target>Не вдалося скасувати підписку: %error%</target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>The quantity of a subscription cannot be changed.</source>
+        <target>Кількість у підписці змінити не можна.</target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>The selected plan is not available in the cart currency.</source>
+        <target>Обраний план недоступний у валюті кошика.</target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>The selected subscription plan is not available.</source>
+        <target>Обраний план підписки недоступний.</target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>The subscription could not be canceled. Please try again later.</source>
+        <target>Не вдалося скасувати підписку. Спробуйте пізніше.</target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>This subscription is already in your cart.</source>
+        <target>Ця підписка вже в кошику.</target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>You have no subscriptions yet.</source>
+        <target>У вас ще немає підписок.</target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Your subscription could not be processed. Please try again.</source>
+        <target>Не вдалося оформити підписку. Будь ласка, спробуйте ще раз.</target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Your subscription has been canceled.</source>
+        <target>Вашу підписку скасовано.</target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>day(s)</source>
+        <target>дн.</target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>every</source>
+        <target>кожні</target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>free (trial)</source>
+        <target>безкоштовно (пробний період)</target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>month(s)</source>
+        <target>міс.</target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>week(s)</source>
+        <target>тиж.</target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>year(s)</source>
+        <target>р.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

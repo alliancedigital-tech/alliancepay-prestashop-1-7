@@ -1,0 +1,49 @@
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-header-title">{{ 'Plan templates'|trans({}, 'ModulesAlliancePayAdmin') }}</h3>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">{{ 'A template defines the schedule structure without amounts. A template used by a plan can only be archived.'|trans({}, 'ModulesAlliancePayAdmin') }}</p>
+            <a class="btn btn-primary mb-3" href="{{ path('alliance.admin.subscription.template_new') }}">{{ 'New template'|trans({}, 'ModulesAlliancePayAdmin') }}</a>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>{{ 'Code'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Name'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Stages'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Status'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th>{{ 'Used by plans'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in templates %}
+                        <tr>
+                            <td>{{ item.entity.code }}</td>
+                            <td>{{ item.entity.name }}</td>
+                            <td>{{ item.entity.rulesTemplate|length }}</td>
+                            <td>{{ item.entity.status }}</td>
+                            <td>{{ item.used ? 'Yes'|trans({}, 'ModulesAlliancePayAdmin') : 'No'|trans({}, 'ModulesAlliancePayAdmin') }}</td>
+                            <td class="text-right">
+                                {% if item.entity.status == 'active' %}
+                                    <a class="btn btn-outline-secondary btn-sm" href="{{ path('alliance.admin.subscription.template_edit', {id: item.entity.id}) }}">
+                                        {{ item.used ? 'View'|trans({}, 'ModulesAlliancePayAdmin') : 'Edit'|trans({}, 'ModulesAlliancePayAdmin') }}
+                                    </a>
+                                    <form method="post" class="d-inline" action="{{ path('alliance.admin.subscription.template_archive', {id: item.entity.id}) }}"
+                                          onsubmit="return confirm('{{ 'Archive this template?'|trans({}, 'ModulesAlliancePayAdmin')|e('js') }}');">
+                                        <button class="btn btn-outline-danger btn-sm" type="submit">{{ 'Archive'|trans({}, 'ModulesAlliancePayAdmin') }}</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="6" class="text-muted">{{ 'No templates yet.'|trans({}, 'ModulesAlliancePayAdmin') }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
