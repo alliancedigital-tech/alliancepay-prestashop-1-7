@@ -40,6 +40,77 @@
         </button>
     </div>
 </div>
+{% if fiscal is not null %}
+<div class="card mt-3">
+    <h3 class="card-header">
+        <i class="material-icons">receipt</i>
+        {{ 'Fiscalization'|trans({}, 'ModulesAlliancePayAdmin') }}
+    </h3>
+
+    <div class="card-body">
+        {% if fiscal.error is defined and fiscal.error %}
+            <div class="alert alert-danger mb-0">{{ 'Fiscalization data could not be loaded. Make sure the module is upgraded to the latest version and check the PrestaShop log.'|trans({}, 'ModulesAlliancePayAdmin') }}</div>
+        {% else %}
+        <table class="table">
+            <thead>
+            <tr>
+                <th>{{ 'Operation type'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                <th>{{ 'Operation ID'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                <th>{{ 'Status'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                <th>{{ 'Fiscal number'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                <th>{{ 'Receipt'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                <th>{{ 'Fiscalization date'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                <th>{{ 'Error'|trans({}, 'ModulesAlliancePayAdmin') }}</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in fiscal.rows %}
+                {% set record = row.record %}
+                <tr>
+                    <td>{{ row.type }}</td>
+                    <td>{{ row.operationId }}</td>
+                    <td>
+                        {% if record %}
+                            <span class="badge badge-{{ record.status == 'SUCCESS' ? 'success' : (record.status == 'PENDING' ? 'info' : 'danger') }}">{{ record.status }}</span>
+                        {% else %}
+                            <span class="badge badge-secondary">{{ 'Not fiscalized'|trans({}, 'ModulesAlliancePayAdmin') }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ record ? record.fiscalNumber : '' }}</td>
+                    <td>
+                        {% if record and record.receiptUrl and (record.receiptUrl starts with 'https://' or record.receiptUrl starts with 'http://') %}
+                            <a href="{{ record.receiptUrl }}" target="_blank" rel="noopener noreferrer">{{ 'Open'|trans({}, 'ModulesAlliancePayAdmin') }}</a>
+                        {% endif %}
+                    </td>
+                    <td>{{ record and record.fiscalizationDateTime ? record.fiscalizationDateTime|date('Y-m-d H:i:s') : '' }}</td>
+                    <td>{{ record and record.errorCode ? record.errorCode ~ ' ' ~ record.errorDescription : '' }}</td>
+                    <td class="text-right">
+                        {% if row.canFiscalize %}
+                            <form method="post" action="{{ row.create_url }}" class="d-inline">
+                                <input type="hidden" name="_csrf" value="{{ fiscal.csrf }}">
+                                <button type="submit" class="btn btn-primary btn-sm">{{ 'Fiscalize'|trans({}, 'ModulesAlliancePayAdmin') }}</button>
+                            </form>
+                        {% endif %}
+                        {% if row.canRefresh %}
+                            <form method="post" action="{{ row.refresh_url }}" class="d-inline">
+                                <input type="hidden" name="_csrf" value="{{ fiscal.csrf }}">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">{{ 'Refresh status'|trans({}, 'ModulesAlliancePayAdmin') }}</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="8" class="text-muted text-center">{{ 'No operations to fiscalize'|trans({}, 'ModulesAlliancePayAdmin') }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
 </div>
 
 <script type="text/javascript">

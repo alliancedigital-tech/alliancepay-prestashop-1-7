@@ -25,6 +25,7 @@ class AllianceLogger extends Logger
         AllianceLoggerHandler $handler
     ) {
         parent::__construct(self::CHANNEL);
+        $this->pushProcessor(new SensitiveDataProcessor());
         $this->pushHandler($handler);
     }
 

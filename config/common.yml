@@ -19,3 +19,19 @@ services:
     factory: [ '@doctrine.orm.default_entity_manager', getRepository ]
     arguments:
       - 'AlliancePay\Entity\AllianceRefundOrder'
+
+  AlliancePay\Repository\FiscalizationRepository:
+    class: AlliancePay\Repository\FiscalizationRepository
+    public: true
+    autowire: false
+    factory: [ '@doctrine.orm.default_entity_manager', getRepository ]
+    arguments:
+      - 'AlliancePay\Entity\AllianceFiscalization'
+
+  AlliancePay\Repository\ProductFiscalRepository:
+    class: AlliancePay\Repository\ProductFiscalRepository
+    public: true
+    autowire: false
+    factory: [ '@doctrine.orm.default_entity_manager', getRepository ]
+    arguments:
+      - 'AlliancePay\Entity\AllianceProductFiscal'

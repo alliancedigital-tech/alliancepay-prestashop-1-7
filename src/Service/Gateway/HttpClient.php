@@ -36,6 +36,8 @@ class HttpClient
 
     private const ENDPOINT_REFUND = '/ecom/jws/payments/refund_v1';
 
+    private const ENDPOINT_FISCALIZATION_CREATE = '/ecom/jws/cashbox/v2/fiscalization/create';
+
     private const ENDPOINT_COMPLETION = '/ecom/jws/payments/preauth/completion_v1';
 
     /**
@@ -200,6 +202,17 @@ class HttpClient
         }
 
         return $this->parseResponse($response);
+    }
+
+    /**
+     * Creates (or returns the existing, the call is idempotent by operationId) a fiscalization.
+     *
+     * @param array $data MerchantFiscalizationRequestDTO
+     * @return array{status_code: int, body: string, data: array, error: ?string} never throws
+     */
+    public function createFiscalization(array $data): array
+    {
+        return $this->post(self::ENDPOINT_FISCALIZATION_CREATE, $data);
     }
 
     /**

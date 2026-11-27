@@ -125,7 +125,7 @@
                               placeholder="-----BEGIN PRIVATE KEY-----&#10;...&#10;-----END PRIVATE KEY-----"
                               rows="6">{{ config.ALLIANCE_PAY_JWS_PRIVATE_KEY }}</textarea>
                     <small class="form-text text-muted">
-                        {{ 'RSA private key in PEM format (PKCS#8) for signing JWS tokens (RS256). Keep secret.'|trans({}, 'ModulesAlliancePayAdmin') }}
+                        {{ 'EC P-256 private key in PEM format (PKCS#8) for signing JWS tokens (ES256; legacy RSA keys use RS256). Keep secret.'|trans({}, 'ModulesAlliancePayAdmin') }}
                     </small>
                 </div>
                 <div class="form-group">
@@ -210,6 +210,56 @@
                     </select>
                     <small class="form-text text-muted">
                         {{ 'Shows the subscription option on product pages and allows creating subscription plans.'|trans({}, 'ModulesAlliancePayAdmin') }}
+                    </small>
+                </div>
+
+                <h3 class="mt-4">{{ 'Fiscalization'|trans({}, 'ModulesAlliancePayAdmin') }}</h3>
+                <div class="form-group">
+                    <label>{{ 'Enable fiscalization'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <select name="ALLIANCE_PAY_FISCAL_ENABLED" class="form-control">
+                        <option value="1" {{ config.ALLIANCE_PAY_FISCAL_ENABLED == '1' ? 'selected' }}>{{ 'Yes'|trans({}, 'ModulesAlliancePayAdmin') }}</option>
+                        <option value="0" {{ config.ALLIANCE_PAY_FISCAL_ENABLED != '1' ? 'selected' }}>{{ 'No'|trans({}, 'ModulesAlliancePayAdmin') }}</option>
+                    </select>
+                    <small class="form-text text-muted">
+                        {{ 'When disabled, no fiscalization requests are sent and the fiscalization buttons are hidden.'|trans({}, 'ModulesAlliancePayAdmin') }}
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>{{ 'Automatic fiscalization'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <select name="ALLIANCE_PAY_FISCAL_AUTO" class="form-control">
+                        <option value="1" {{ config.ALLIANCE_PAY_FISCAL_AUTO == '1' ? 'selected' }}>{{ 'Yes'|trans({}, 'ModulesAlliancePayAdmin') }}</option>
+                        <option value="0" {{ config.ALLIANCE_PAY_FISCAL_AUTO != '1' ? 'selected' }}>{{ 'No'|trans({}, 'ModulesAlliancePayAdmin') }}</option>
+                    </select>
+                    <small class="form-text text-muted">
+                        {{ 'Sends a fiscalization request after a successful payment or refund. When disabled, fiscalization is done manually from the order page, for payments and refunds alike.'|trans({}, 'ModulesAlliancePayAdmin') }}
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label for="ALLIANCE_PAY_FISCAL_TAX_CODE">{{ 'Default tax code (taxCode)'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <input type="text" class="form-control" id="ALLIANCE_PAY_FISCAL_TAX_CODE" name="ALLIANCE_PAY_FISCAL_TAX_CODE" value="{{ config.ALLIANCE_PAY_FISCAL_TAX_CODE }}">
+                    <small class="form-text text-muted">
+                        {{ 'Integer, optional. Used when the product has no value of its own.'|trans({}, 'ModulesAlliancePayAdmin') }}
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label for="ALLIANCE_PAY_FISCAL_CLASSIFICATION_CODE">{{ 'Default UKTZED code (classificationCode)'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <input type="text" class="form-control" id="ALLIANCE_PAY_FISCAL_CLASSIFICATION_CODE" name="ALLIANCE_PAY_FISCAL_CLASSIFICATION_CODE" value="{{ config.ALLIANCE_PAY_FISCAL_CLASSIFICATION_CODE }}">
+                    <small class="form-text text-muted">
+                        {{ 'Digits only (usually 10). Required when the default tax code is 2, 7 or 8.'|trans({}, 'ModulesAlliancePayAdmin') }}
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label for="ALLIANCE_PAY_FISCAL_EXCISE_LABELS">{{ 'Default excise labels (exciseLabels)'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <textarea class="form-control" id="ALLIANCE_PAY_FISCAL_EXCISE_LABELS" name="ALLIANCE_PAY_FISCAL_EXCISE_LABELS" rows="2">{{ config.ALLIANCE_PAY_FISCAL_EXCISE_LABELS }}</textarea>
+                    <small class="form-text text-muted">
+                        {{ 'Comma or line separated list. Optional.'|trans({}, 'ModulesAlliancePayAdmin') }}
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label for="ALLIANCE_PAY_FISCAL_MEASUREMENT_CODE">{{ 'Default measurement code (measurementCode)'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+                    <input type="text" class="form-control" id="ALLIANCE_PAY_FISCAL_MEASUREMENT_CODE" name="ALLIANCE_PAY_FISCAL_MEASUREMENT_CODE" value="{{ config.ALLIANCE_PAY_FISCAL_MEASUREMENT_CODE }}">
+                    <small class="form-text text-muted">
+                        {{ 'Required. 0001 means "piece".'|trans({}, 'ModulesAlliancePayAdmin') }}
                     </small>
                 </div>
 

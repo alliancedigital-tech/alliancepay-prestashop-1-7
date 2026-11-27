@@ -24,6 +24,14 @@ class UrlProvider
         return $this->getLink()->getModuleLink(Config::MODULE_NAME, 'callback', [], true);
     }
 
+    /**
+     * @return string
+     */
+    public function getFiscalizationCallbackUrl(): string
+    {
+        return $this->getLink()->getModuleLink(Config::MODULE_NAME, 'fiscalcallback', [], true);
+    }
+
     public function getConfirmationUrl(int $cartId, int $orderId, string $customerSecureKey): string
     {
         $link = $this->getLink();

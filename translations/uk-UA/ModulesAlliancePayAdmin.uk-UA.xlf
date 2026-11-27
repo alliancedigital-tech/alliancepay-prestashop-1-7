@@ -43,8 +43,8 @@
         <target>Приватний ключ JWS</target>
       </trans-unit>
       <trans-unit id="28">
-        <source>RSA private key in PEM format (PKCS#8) for signing JWS tokens (RS256). Keep secret.</source>
-        <target>Приватний ключ RSA у форматі PEM (PKCS#8) для підпису JWS токенів (RS256). Тримайте в секреті.</target>
+        <source>EC P-256 private key in PEM format (PKCS#8) for signing JWS tokens (ES256; legacy RSA keys use RS256). Keep secret.</source>
+        <target>Приватний ключ EC P-256 у форматі PEM (PKCS#8) для підпису JWS токенів (ES256; застарілі RSA-ключі підписуються RS256). Тримайте в секреті.</target>
       </trans-unit>
       <trans-unit id="29">
         <source>JWS Key ID (kid)</source>
@@ -733,6 +733,218 @@
       <trans-unit id="189">
         <source>price differs</source>
         <target>ціна відрізняється</target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>Fiscalization</source>
+        <target>Фіскалізація</target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>Enable fiscalization</source>
+        <target>Увімкнути фіскалізацію</target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>Automatic fiscalization</source>
+        <target>Автоматична фіскалізація</target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>When disabled, no fiscalization requests are sent and the fiscalization buttons are hidden.</source>
+        <target>Якщо вимкнено, запити фіскалізації не надсилаються, а кнопки фіскалізації приховані.</target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>Sends a fiscalization request after a successful payment or refund. When disabled, fiscalization is done manually from the order page, for payments and refunds alike.</source>
+        <target>Надсилає запит фіскалізації після успішної оплати або повернення. Якщо вимкнено, фіскалізація виконується вручну зі сторінки замовлення, і для оплат, і для повернень.</target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Default tax code (taxCode)</source>
+        <target>Код податкової групи за замовчуванням (taxCode)</target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>Integer, optional. Used when the product has no value of its own.</source>
+        <target>Ціле число, необов’язкове. Використовується, якщо у товару немає власного значення.</target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>Default UKTZED code (classificationCode)</source>
+        <target>УКТЗЕД за замовчуванням (classificationCode)</target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>Digits only (usually 10). Required when the default tax code is 2, 7 or 8.</source>
+        <target>Лише цифри (зазвичай 10). Обов’язкове, якщо код податкової групи за замовчуванням 2, 7 або 8.</target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>Default excise labels (exciseLabels)</source>
+        <target>Акцизні марки за замовчуванням (exciseLabels)</target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Comma or line separated list. Optional.</source>
+        <target>Список через кому або по рядку. Необов’язкове.</target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>Default measurement code (measurementCode)</source>
+        <target>Код одиниці виміру за замовчуванням (measurementCode)</target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Required. 0001 means "piece".</source>
+        <target>Обов’язкове. 0001 — «штука».</target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>Tax code must be an integer.</source>
+        <target>Код податкової групи має бути цілим числом.</target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>UKTZED code must contain digits only.</source>
+        <target>УКТЗЕД має містити лише цифри.</target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>Measurement code is required.</source>
+        <target>Код одиниці виміру обов’язковий.</target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>UKTZED code is required when the tax code is 2, 7 or 8.</source>
+        <target>УКТЗЕД обов’язковий, якщо код податкової групи 2, 7 або 8.</target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>Empty fields use the defaults from the module settings.</source>
+        <target>Порожні поля беруть значення за замовчуванням з налаштувань модуля.</target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>Tax code (taxCode)</source>
+        <target>Код податкової групи (taxCode)</target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>UKTZED code (classificationCode)</source>
+        <target>УКТЗЕД (classificationCode)</target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>Digits only. Required when the tax code is 2, 7 or 8 (here or in the defaults).</source>
+        <target>Лише цифри. Обов’язково, якщо код податкової групи 2, 7 або 8 (тут або в налаштуваннях за замовчуванням).</target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>Excise labels (exciseLabels)</source>
+        <target>Акцизні марки (exciseLabels)</target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>Comma separated list.</source>
+        <target>Список через кому.</target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>Measurement code (measurementCode)</source>
+        <target>Код одиниці виміру (measurementCode)</target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>Operation type</source>
+        <target>Тип операції</target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>Operation ID</source>
+        <target>ID операції</target>
+      </trans-unit>
+      <trans-unit id="216">
+        <source>Fiscal number</source>
+        <target>Фіскальний номер</target>
+      </trans-unit>
+      <trans-unit id="217">
+        <source>Receipt</source>
+        <target>Чек</target>
+      </trans-unit>
+      <trans-unit id="218">
+        <source>Fiscalization date</source>
+        <target>Дата фіскалізації</target>
+      </trans-unit>
+      <trans-unit id="219">
+        <source>Error</source>
+        <target>Помилка</target>
+      </trans-unit>
+      <trans-unit id="220">
+        <source>Not fiscalized</source>
+        <target>Не фіскалізовано</target>
+      </trans-unit>
+      <trans-unit id="221">
+        <source>Fiscalize</source>
+        <target>Фіскалізувати</target>
+      </trans-unit>
+      <trans-unit id="222">
+        <source>Refresh status</source>
+        <target>Оновити статус</target>
+      </trans-unit>
+      <trans-unit id="223">
+        <source>No operations to fiscalize</source>
+        <target>Немає операцій для фіскалізації</target>
+      </trans-unit>
+      <trans-unit id="242">
+        <source>Fiscalization data could not be loaded. Make sure the module is upgraded to the latest version and check the PrestaShop log.</source>
+        <target>Не вдалося завантажити дані фіскалізації. Переконайтесь, що модуль оновлено до останньої версії, та перегляньте лог PrestaShop.</target>
+      </trans-unit>
+      <trans-unit id="224">
+        <source>Invalid security token.</source>
+        <target>Недійсний токен безпеки.</target>
+      </trans-unit>
+      <trans-unit id="225">
+        <source>Fiscalization is disabled in the module settings.</source>
+        <target>Фіскалізацію вимкнено в налаштуваннях модуля.</target>
+      </trans-unit>
+      <trans-unit id="226">
+        <source>This operation is already fiscalized or being fiscalized.</source>
+        <target>Ця операція вже фіскалізована або фіскалізується.</target>
+      </trans-unit>
+      <trans-unit id="227">
+        <source>The operation was not found or is not successful.</source>
+        <target>Операцію не знайдено або вона неуспішна.</target>
+      </trans-unit>
+      <trans-unit id="228">
+        <source>Fiscalization request was not sent.</source>
+        <target>Запит фіскалізації не надіслано.</target>
+      </trans-unit>
+      <trans-unit id="229">
+        <source>Fiscalization record was not found.</source>
+        <target>Запис фіскалізації не знайдено.</target>
+      </trans-unit>
+      <trans-unit id="230">
+        <source>The status of this fiscalization cannot be refreshed.</source>
+        <target>Статус цієї фіскалізації не можна оновити.</target>
+      </trans-unit>
+      <trans-unit id="231">
+        <source>Fiscalization failed.</source>
+        <target>Фіскалізація не вдалася.</target>
+      </trans-unit>
+      <trans-unit id="232">
+        <source>The status could not be refreshed.</source>
+        <target>Не вдалося оновити статус.</target>
+      </trans-unit>
+      <trans-unit id="233">
+        <source>Fiscalization request failed.</source>
+        <target>Запит фіскалізації завершився помилкою.</target>
+      </trans-unit>
+      <trans-unit id="234">
+        <source>The receipt was fiscalized.</source>
+        <target>Чек фіскалізовано.</target>
+      </trans-unit>
+      <trans-unit id="235">
+        <source>Fiscalization request was sent, waiting for the result.</source>
+        <target>Запит фіскалізації надіслано, очікуємо результат.</target>
+      </trans-unit>
+      <trans-unit id="236">
+        <source>Order not found.</source>
+        <target>Замовлення не знайдено.</target>
+      </trans-unit>
+      <trans-unit id="237">
+        <source>The credit slip of this refund was not found, the refunded items are unknown.</source>
+        <target>Кредитну ноту цього повернення не знайдено, позиції повернення невідомі.</target>
+      </trans-unit>
+      <trans-unit id="238">
+        <source>A required field is missing in the request</source>
+        <target>У запиті відсутнє обов’язкове поле</target>
+      </trans-unit>
+      <trans-unit id="239">
+        <source>A field of the request has an invalid format</source>
+        <target>Поле запиту має невірний формат</target>
+      </trans-unit>
+      <trans-unit id="240">
+        <source>The payment operation was not found</source>
+        <target>Платіжну операцію не знайдено</target>
+      </trans-unit>
+      <trans-unit id="241">
+        <source>The receipt of the original purchase was not found, fiscalize the purchase first</source>
+        <target>Чек початкової покупки не знайдено, спочатку фіскалізуйте покупку</target>
       </trans-unit>
     </body>
   </file>

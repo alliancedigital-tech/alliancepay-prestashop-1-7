@@ -128,6 +128,14 @@ class PaymentProcessor extends AbstractProcessor
                     throw new Exception('Create order service error.');
                 }
 
+                if (($resultRequest['success'] ?? true) === false || empty($resultRequest['redirectUrl'])) {
+                    $this->logger->error('Create order: unexpected bank response', $resultRequest);
+
+                    throw new Exception(
+                        'Create order service error: ' . ($resultRequest['message'] ?? 'unexpected bank response') . '.'
+                    );
+                }
+
                 $preparedData = $this->convertDataService->camelToSnakeArrayKeys(
                     $resultRequest
                 );

@@ -14,6 +14,7 @@ use AlliancePay\Entity\AllianceSubscription;
 use AlliancePay\Logger\AllianceLogger;
 use AlliancePay\Repository\ScheduledPaymentRepository;
 use AlliancePay\Service\Callback\CallbackProcessor;
+use AlliancePay\Service\Fiscalization\FiscalizationService;
 use AlliancePay\Service\Subscription\Audit\AuditLogger;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -67,11 +68,18 @@ class SubscriptionCallbackProcessor
      */
     private $logger;
 
+    /**
+     * @var FiscalizationService|null
+     */
+    private $fiscalizationService;
+
     public function __construct(
         CallbackProcessor $orderCallbackProcessor,
         AuditLogger $auditLogger,
-        AllianceLogger $logger
+        AllianceLogger $logger,
+        ?FiscalizationService $fiscalizationService = null
     ) {
+        $this->fiscalizationService = $fiscalizationService;
         $this->orderCallbackProcessor = $orderCallbackProcessor;
         $this->auditLogger = $auditLogger;
         $this->logger = $logger;
@@ -332,6 +340,7 @@ class SubscriptionCallbackProcessor
 
             if (!$isInitial) {
                 $this->addRecurringOrderPayment($subscription, $operation, $operationId);
+                $this->scheduleFiscalization($em, $subscription);
             }
         }
     }
@@ -445,6 +454,22 @@ class SubscriptionCallbackProcessor
             null,
             $subscription->getId()
         );
+    }
+
+    /**
+     * Automatic fiscalization of a recurring PURCHASE (after the response, see FiscalizationService).
+     */
+    private function scheduleFiscalization(EntityManagerInterface $em, AllianceSubscription $subscription): void
+    {
+        if ($this->fiscalizationService === null) {
+            return;
+        }
+
+        try {
+            $this->fiscalizationService->scheduleAutoForOrder($em, $subscription->getOrderId());
+        } catch (Throwable $exception) {
+            $this->logger->error('Fiscalization scheduling failed: ' . $exception->getMessage());
+        }
     }
 
     /**

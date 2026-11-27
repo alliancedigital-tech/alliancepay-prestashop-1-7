@@ -11,6 +11,7 @@ use Exception;
 use RuntimeException;
 use SimpleJWT\JWT;
 use SimpleJWT\Keys\KeyException;
+use SimpleJWT\Keys\ECKey;
 use SimpleJWT\Keys\KeyFactory;
 use SimpleJWT\Keys\KeySet;
 use SimpleJWT\Keys\RSAKey;
@@ -21,7 +22,9 @@ use AlliancePay\Service\RequestIdentification\GenerateRequestIdentification;
  */
 class JwsSigner
 {
-    private const ALGORITHM = 'RS256';
+    private const ALGORITHM_RSA = 'RS256';
+    private const ALGORITHM_EC = 'ES256';
+    private const EC_CURVE = 'P-256';
 
     /**
      * @param string $privateKeyPem
@@ -53,9 +56,20 @@ class JwsSigner
             throw new Exception('JWS Private Key is invalid: ' . $e->getMessage());
         }
 
-        if (!$key instanceof RSAKey) {
+        if ($key instanceof ECKey) {
+            if ($key->getCurve() !== self::EC_CURVE) {
+                throw new Exception(
+                    'JWS Private Key is invalid: expected an EC key on curve ' . self::EC_CURVE
+                    . ', got ' . $key->getCurve() . '.'
+                );
+            }
+
+            $algorithm = self::ALGORITHM_EC;
+        } elseif ($key instanceof RSAKey) {
+            $algorithm = self::ALGORITHM_RSA;
+        } else {
             throw new Exception(
-                'JWS Private Key is invalid: expected an RSA key (PKCS#8), got ' . get_class($key) . '.'
+                'JWS Private Key is invalid: expected an EC P-256 key (PKCS#8), got ' . get_class($key) . '.'
             );
         }
 
@@ -66,7 +80,7 @@ class JwsSigner
 
         $jwt = new JWT(
             [
-                'alg' => self::ALGORITHM,
+                'alg' => $algorithm,
                 'ts' => (string) (int) (microtime(true) * 1000),
                 'targetUrl' => $targetUrl,
                 'kid' => $kid,

@@ -53,6 +53,28 @@ class Config
     public const PAYMENT_COMPLETION_ORDER_STATE_CONFIG_NAME = 'ALLIANCE_PAY_COMPLETION_ORDER_STATE';
     public const SUBSCRIPTIONS_ENABLED_CONFIG_NAME = 'ALLIANCE_PAY_SUBSCRIPTIONS_ENABLED';
 
+    public const FISCAL_ENABLED_CONFIG_NAME = 'ALLIANCE_PAY_FISCAL_ENABLED';
+    public const FISCAL_AUTO_CONFIG_NAME = 'ALLIANCE_PAY_FISCAL_AUTO';
+    public const FISCAL_TAX_CODE_CONFIG_NAME = 'ALLIANCE_PAY_FISCAL_TAX_CODE';
+    public const FISCAL_CLASSIFICATION_CODE_CONFIG_NAME = 'ALLIANCE_PAY_FISCAL_CLASSIFICATION_CODE';
+    public const FISCAL_EXCISE_LABELS_CONFIG_NAME = 'ALLIANCE_PAY_FISCAL_EXCISE_LABELS';
+    public const FISCAL_MEASUREMENT_CODE_CONFIG_NAME = 'ALLIANCE_PAY_FISCAL_MEASUREMENT_CODE';
+
+    public const FISCAL_DEFAULT_MEASUREMENT_CODE = '0001';
+
+    /**
+     * Fiscalization settings are saved separately from PAYMENT_ALL_CONFIG_NAMES: they are validated and,
+     * unlike the payment settings, may be cleared with an empty value.
+     */
+    public const FISCAL_CONFIG_NAMES = [
+        self::FISCAL_ENABLED_CONFIG_NAME,
+        self::FISCAL_AUTO_CONFIG_NAME,
+        self::FISCAL_TAX_CODE_CONFIG_NAME,
+        self::FISCAL_CLASSIFICATION_CODE_CONFIG_NAME,
+        self::FISCAL_EXCISE_LABELS_CONFIG_NAME,
+        self::FISCAL_MEASUREMENT_CODE_CONFIG_NAME,
+    ];
+
     public const PAYMENT_ALL_CONFIG_NAMES = [
         self::PAYMENT_ENABLED_CONFIG_NAME,
         self::PAYMENT_NAME_CONFIG_NAME,
@@ -232,6 +254,57 @@ class Config
                 $this->config->get(self::PAYMENT_COMPLETION_ORDER_STATE_CONFIG_NAME),
             self::SUBSCRIPTIONS_ENABLED_CONFIG_NAME =>
                 $this->config->get(self::SUBSCRIPTIONS_ENABLED_CONFIG_NAME),
+        ] + $this->getFiscalSettings();
+    }
+
+    /**
+     * @return array
+     */
+    public function getFiscalSettings(): array
+    {
+        $settings = [];
+
+        foreach (self::FISCAL_CONFIG_NAMES as $name) {
+            $settings[$name] = $this->config->get($name);
+        }
+
+        if ($settings[self::FISCAL_MEASUREMENT_CODE_CONFIG_NAME] === null
+            || $settings[self::FISCAL_MEASUREMENT_CODE_CONFIG_NAME] === ''
+        ) {
+            $settings[self::FISCAL_MEASUREMENT_CODE_CONFIG_NAME] = self::FISCAL_DEFAULT_MEASUREMENT_CODE;
+        }
+
+        return $settings;
+    }
+
+    public function isFiscalizationEnabled(): bool
+    {
+        return (bool) $this->config->get(self::FISCAL_ENABLED_CONFIG_NAME);
+    }
+
+    public function isFiscalizationAuto(): bool
+    {
+        return (bool) $this->config->get(self::FISCAL_AUTO_CONFIG_NAME);
+    }
+
+    /**
+     * Default fiscal values of the products: taxCode (?int), classificationCode (?string),
+     * exciseLabels (string[]) and measurementCode (string).
+     *
+     * @return array
+     */
+    public function getFiscalDefaults(): array
+    {
+        $settings = $this->getFiscalSettings();
+        $taxCode = $settings[self::FISCAL_TAX_CODE_CONFIG_NAME];
+        $classification = trim((string) $settings[self::FISCAL_CLASSIFICATION_CODE_CONFIG_NAME]);
+        $excise = trim((string) $settings[self::FISCAL_EXCISE_LABELS_CONFIG_NAME]);
+
+        return [
+            'taxCode' => $taxCode === null || $taxCode === '' ? null : (int) $taxCode,
+            'classificationCode' => $classification === '' ? null : $classification,
+            'exciseLabels' => $excise === '' ? [] : array_values(array_filter(array_map('trim', explode(',', $excise)), 'strlen')),
+            'measurementCode' => (string) $settings[self::FISCAL_MEASUREMENT_CODE_CONFIG_NAME],
         ];
     }
 

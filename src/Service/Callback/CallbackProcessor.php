@@ -12,6 +12,7 @@ use AlliancePay\Config\Config;
 use AlliancePay\Entity\AllianceOrder;
 use AlliancePay\Logger\AllianceLogger;
 use AlliancePay\Model\AllianceOrder\UpdateAllianceOrder;
+use AlliancePay\Service\Fiscalization\FiscalizationService;
 use AlliancePay\Service\Order\UpdateOrderStatus;
 use Exception;
 use Order;
@@ -42,12 +43,19 @@ class CallbackProcessor
      */
     private $allianceLogger;
 
+    /**
+     * @var FiscalizationService|null
+     */
+    private $fiscalizationService;
+
     public function __construct(
         UpdateAllianceOrder $updateAllianceOrder,
         UpdateOrderStatus  $updateOrderStatus,
         Config $config,
-        AllianceLogger $allianceLogger
+        AllianceLogger $allianceLogger,
+        ?FiscalizationService $fiscalizationService = null
     ) {
+        $this->fiscalizationService = $fiscalizationService;
         $this->updateAllianceOrder = $updateAllianceOrder;
         $this->updateOrderStatus = $updateOrderStatus;
         $this->config = $config;
@@ -109,6 +117,29 @@ class CallbackProcessor
                 $order->getOrderId(),
                 $newStateId
             );
+        }
+
+        $this->scheduleFiscalization($em, $order->getOrderId());
+    }
+
+    /**
+     * Automatic fiscalization of the new successful PURCHASE / REFUND operations. It runs after the response
+     * and cannot affect the processing of the payment (see FiscalizationService::scheduleAutoForOrder).
+     *
+     * @param $em
+     * @param int $orderId
+     * @return void
+     */
+    private function scheduleFiscalization($em, int $orderId): void
+    {
+        if ($this->fiscalizationService === null) {
+            return;
+        }
+
+        try {
+            $this->fiscalizationService->scheduleAutoForOrder($em, $orderId);
+        } catch (\Throwable $exception) {
+            $this->allianceLogger->error('Fiscalization scheduling failed: ' . $exception->getMessage());
         }
     }
 

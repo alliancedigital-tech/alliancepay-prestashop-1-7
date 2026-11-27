@@ -41,6 +41,14 @@ class Alliancepay extends PaymentModule
         'AlliancePaySubscriptionAudit' => ['alliance.admin.subscription.audit', 'Subscription audit log', 'Журнал аудиту підписок'],
     ];
 
+    /**
+     * Hooks of the fiscalization feature (product form fields).
+     */
+    public const FISCALIZATION_HOOKS = [
+        'displayAdminProductsExtra',
+        'actionProductSave',
+    ];
+
     public const SUBSCRIPTION_PARENT_TAB = 'AlliancePaySubscriptionsParent';
 
 
@@ -60,7 +68,7 @@ class Alliancepay extends PaymentModule
     {
         $this->name = 'alliancepay';
         $this->tab = 'payments_gateways';
-        $this->version = '1.4.0';
+        $this->version = '1.5.0';
         $this->author = 'Alliance Dgtl.';
         $this->bootstrap = true;
         $this->active = true;
@@ -97,7 +105,8 @@ class Alliancepay extends PaymentModule
         try {
             $instalTablesResult = $this->createAllianceOrderTable()
                 && $this->createAllianceRefundTable()
-                && $this->createSubscriptionTables();
+                && $this->createSubscriptionTables()
+                && $this->createFiscalizationTables();
         } catch(PrestaShopDatabaseException $e) {
             $message = 'Alliance create tables error: ' . $e->getMessage();
             PrestaShopLogger::addLog('AlliancePay: ' . $message, 3);
@@ -107,6 +116,8 @@ class Alliancepay extends PaymentModule
 
         return Configuration::updateValue('ALLIANCE_PAYMENT_NAME', 'AlliancePay')
             && $instalTablesResult
+            && $this->installFiscalizationDefaults()
+            && $this->registerFiscalizationHooks()
             && $this->installSubscriptionTabs();
     }
 
@@ -120,6 +131,59 @@ class Alliancepay extends PaymentModule
             && parent::uninstall()
             && Configuration::deleteByName('ALLIANCE_PAYMENT_NAME')
         );
+    }
+
+    /**
+     * Creates the fiscalization tables (install and the fiscalization upgrade script).
+     *
+     * @return bool
+     */
+    public function createFiscalizationTables()
+    {
+        if (!class_exists('\AlliancePay\Install\FiscalizationSchema')) {
+            require_once __DIR__ . '/src/Install/FiscalizationSchema.php';
+        }
+
+        foreach (\AlliancePay\Install\FiscalizationSchema::getCreateStatements(_DB_PREFIX_) as $sql) {
+            if (!Db::getInstance()->execute($sql)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Sets the default measurement code, an existing value is kept. Idempotent.
+     *
+     * @return bool
+     */
+    public function installFiscalizationDefaults()
+    {
+        $current = Configuration::get(Config::FISCAL_MEASUREMENT_CODE_CONFIG_NAME);
+
+        if ($current !== false && $current !== null && $current !== '') {
+            return true;
+        }
+
+        return Configuration::updateValue(
+            Config::FISCAL_MEASUREMENT_CODE_CONFIG_NAME,
+            Config::FISCAL_DEFAULT_MEASUREMENT_CODE
+        );
+    }
+
+    /**
+     * @return bool
+     */
+    public function registerFiscalizationHooks()
+    {
+        foreach (self::FISCALIZATION_HOOKS as $hook) {
+            if (!$this->isRegisteredInHook($hook) && !$this->registerHook($hook)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -610,6 +674,7 @@ class Alliancepay extends PaymentModule
             '@Modules/alliancepay/views/templates/admin/order/order_transactions.twig',
             [
                 'order_id' => $orderId,
+                'fiscal' => $this->getFiscalizationViewData($orderId, $entityManager, $router, $container),
                 'operations' => $operations,
                 'sync_url' => $router->generate(
                     'alliance.order.sync',
@@ -617,6 +682,81 @@ class Alliancepay extends PaymentModule
                 ),
             ]
         );
+    }
+
+    /**
+     * Fiscal fields (taxCode, UKTZED, excise labels, measurement code) in the product form.
+     *
+     * @param array $params
+     * @return string
+     */
+    public function hookDisplayAdminProductsExtra(array $params): string
+    {
+        $productId = (int) ($params['id_product'] ?? 0);
+
+        if ($productId <= 0) {
+            return '';
+        }
+
+        try {
+            /** @var \AlliancePay\Service\Fiscalization\ProductFiscalManager $manager */
+            $manager = ServiceLocator::get(\AlliancePay\Service\Fiscalization\ProductFiscalManager::class);
+            $symfonyContainer = \PrestaShop\PrestaShop\Adapter\SymfonyContainer::getInstance();
+            $entityManager = $symfonyContainer->get('doctrine.orm.entity_manager');
+            $twig = $symfonyContainer->get('twig');
+            $values = $manager->get($entityManager, $productId);
+            $values['exciseLabels'] = implode(', ', $values['exciseLabels']);
+
+            return $twig->render(
+                '@Modules/alliancepay/views/templates/admin/product/fiscal.html.twig',
+                [
+                    'values' => $values,
+                    'defaults' => ServiceLocator::get(Config::class)->getFiscalDefaults(),
+                ]
+            );
+        } catch (Throwable $e) {
+            PrestaShopLogger::addLog('AlliancePay: product fiscal form error: ' . $e->getMessage(), 3);
+
+            return '';
+        }
+    }
+
+    /**
+     * @param array $params
+     * @return void
+     */
+    public function hookActionProductSave(array $params): void
+    {
+        if (!Tools::getIsset('alliancepay_fiscal_present')) {
+            return;
+        }
+
+        $productId = (int) ($params['id_product'] ?? 0);
+        $input = Tools::getValue('alliancepay_fiscal');
+
+        if ($productId <= 0 || !is_array($input)) {
+            return;
+        }
+
+        try {
+            /** @var \AlliancePay\Service\Fiscalization\ProductFiscalManager $manager */
+            $manager = ServiceLocator::get(\AlliancePay\Service\Fiscalization\ProductFiscalManager::class);
+            $errors = $manager->save(
+                \PrestaShop\PrestaShop\Adapter\SymfonyContainer::getInstance()->get('doctrine.orm.entity_manager'),
+                $productId,
+                0,
+                $input
+            );
+
+            if ($errors !== []) {
+                PrestaShopLogger::addLog(
+                    'AlliancePay: fiscal attributes of product ' . $productId . ' were not saved: ' . implode(' ', $errors),
+                    2
+                );
+            }
+        } catch (Throwable $e) {
+            PrestaShopLogger::addLog('AlliancePay: product fiscal save error: ' . $e->getMessage(), 3);
+        }
     }
 
     /**
@@ -841,5 +981,46 @@ class Alliancepay extends PaymentModule
         }
 
         return null;
+    }
+
+    /**
+     * Data of the fiscalization block of the order page, null when the feature is disabled.
+     *
+     * @param int $orderId
+     * @param mixed $entityManager
+     * @param mixed $router
+     * @param mixed $container
+     * @return array|null
+     */
+    private function getFiscalizationViewData($orderId, $entityManager, $router, $container)
+    {
+        try {
+            /** @var \AlliancePay\Service\Fiscalization\FiscalizationService $service */
+            $service = ServiceLocator::get(\AlliancePay\Service\Fiscalization\FiscalizationService::class);
+            $config = ServiceLocator::get(Config::class);
+
+            if (!$config->isFiscalizationEnabled() || !$entityManager instanceof EntityManagerInterface) {
+                return null;
+            }
+
+            $rows = [];
+            foreach ($service->getOverview($entityManager, $orderId) as $row) {
+                $parameters = ['orderId' => $orderId, 'operationId' => $row['operationId']];
+                $row['create_url'] = $router->generate('alliance.fiscalization.create', $parameters);
+                $row['refresh_url'] = $router->generate('alliance.fiscalization.refresh', $parameters);
+                $rows[] = $row;
+            }
+
+            return [
+                'rows' => $rows,
+                'csrf' => $container->get('security.csrf.token_manager')
+                    ->getToken(\AlliancePay\Controller\Admin\Fiscalization\FiscalizationController::CSRF_TOKEN_ID)
+                    ->getValue(),
+            ];
+        } catch (Throwable $e) {
+            PrestaShopLogger::addLog('AlliancePay: fiscalization block error: ' . $e->getMessage(), 3);
+
+            return ['error' => true, 'rows' => [], 'csrf' => ''];
+        }
     }
 }

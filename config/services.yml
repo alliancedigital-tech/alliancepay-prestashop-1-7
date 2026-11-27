@@ -264,3 +264,8 @@ services:
     class: AlliancePay\Controller\Admin\Subscription\AuditController
     public: true
     autowire: false
+
+  AlliancePay\Controller\Admin\Fiscalization\FiscalizationController:
+    class: AlliancePay\Controller\Admin\Fiscalization\FiscalizationController
+    public: true
+    autowire: false

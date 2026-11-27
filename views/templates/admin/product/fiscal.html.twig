@@ -1,0 +1,29 @@
+<div class="panel product-tab" id="alliancepay-fiscal">
+    <h3>{{ 'Fiscalization'|trans({}, 'ModulesAlliancePayAdmin') }}</h3>
+    <input type="hidden" name="alliancepay_fiscal_present" value="1">
+    <p class="help-block">
+        {{ 'Empty fields use the defaults from the module settings.'|trans({}, 'ModulesAlliancePayAdmin') }}
+    </p>
+    <div class="form-group">
+        <label for="alliancepay_fiscal_tax_code">{{ 'Tax code (taxCode)'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+        <input type="text" class="form-control" id="alliancepay_fiscal_tax_code" name="alliancepay_fiscal[taxCode]"
+               value="{{ values.taxCode }}" pattern="\d*" placeholder="{{ defaults.taxCode }}">
+    </div>
+    <div class="form-group">
+        <label for="alliancepay_fiscal_classification">{{ 'UKTZED code (classificationCode)'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+        <input type="text" class="form-control" id="alliancepay_fiscal_classification" name="alliancepay_fiscal[classificationCode]"
+               value="{{ values.classificationCode }}" pattern="\d*" placeholder="{{ defaults.classificationCode }}">
+        <small class="form-text text-muted">{{ 'Digits only. Required when the tax code is 2, 7 or 8 (here or in the defaults).'|trans({}, 'ModulesAlliancePayAdmin') }}</small>
+    </div>
+    <div class="form-group">
+        <label for="alliancepay_fiscal_excise">{{ 'Excise labels (exciseLabels)'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+        <input type="text" class="form-control" id="alliancepay_fiscal_excise" name="alliancepay_fiscal[exciseLabels]"
+               value="{{ values.exciseLabels }}" placeholder="{{ defaults.exciseLabels|join(', ') }}">
+        <small class="form-text text-muted">{{ 'Comma separated list.'|trans({}, 'ModulesAlliancePayAdmin') }}</small>
+    </div>
+    <div class="form-group">
+        <label for="alliancepay_fiscal_measurement">{{ 'Measurement code (measurementCode)'|trans({}, 'ModulesAlliancePayAdmin') }}</label>
+        <input type="text" class="form-control" id="alliancepay_fiscal_measurement" name="alliancepay_fiscal[measurementCode]"
+               value="{{ values.measurementCode }}" placeholder="{{ defaults.measurementCode }}">
+    </div>
+</div>
